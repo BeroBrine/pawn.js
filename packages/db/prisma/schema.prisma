@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String?
+  username    String   @unique
+  email       String   @unique
+  gameAsWhite Game[]   @relation("gameAsWhite")
+  gameAsBlack Game[]   @relation("gameAsBlack")
+  createdAt   DateTime @default(now())
+  lastLogin   DateTime
+}
+
+model Game {
+  id            String     @id @default(uuid())
+  whitePlayerId String
+  blackPlayerId String
+  blackPlayer   User       @relation("gameAsBlack", references: [id], fields: [blackPlayerId])
+  whitePlayer   User       @relation("gameAsWhite", references: [id], fields: [whitePlayerId])
+  defaultFen    String     @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  currentFen    String
+  result        GameResult
+  moves         String[]
+  status        GameStatus
+  createdAt     DateTime   @default(now())
+  Move          Move[]
+}
+
+model Move {
+  id         String   @id @default(uuid())
+  gameId     String
+  game       Game     @relation(references: [id], fields: [gameId])
+  currentFen String
+  from       String
+  to         String
+  createdAt  DateTime @default(now())
+}
+
+enum GameStatus {
+  COMPLETED
+  IN_PROGRESS
+  ABANDONDEND
+}
+
+enum GameResult {
+  WHITE_WIN
+  BLACK_WIN
+  DRAW
+}

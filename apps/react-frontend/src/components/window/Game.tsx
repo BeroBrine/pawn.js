@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ChessBoard from "../ChessBoard";
 import { Chess } from "chess.js";
 import Button from "../Button";
+import { RepoButton } from "@repo/ui/button";
 import { useSocket } from "../../hooks/useSockets";
 
 // TODO: Monorepofy this

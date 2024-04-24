@@ -6,6 +6,9 @@
 	"repository": "https://github.com/BeroBrine/king.js",
 	"author": "Abhishek Rana",
 	"license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/index.ts"
+  },
 	"dependencies": {
 		"@prisma/client": "5.13.0",
 		"@types/node": "^20.12.7",

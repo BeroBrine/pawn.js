@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../Button";
+import { RepoButton } from "@repo/ui/button";
 
 const Landing = () => {
 	const navigate = useNavigate();
