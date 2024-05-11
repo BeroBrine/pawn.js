@@ -1,13 +1,12 @@
-import prisma from "@repo/db/client";
 import express from "express";
+import authRouter from "./routes/auth";
 
 const app: express.Express = express();
 const port = 3000;
 
-app.get("/", (req: express.Request, res: express.Response) => {
-	return res.json({ msg: "heelo ji" });
-});
+app.use(express.json());
+app.use("/auth", authRouter);
 
 app.listen(port, () => {
-	console.log(`running on port ${port}`);
+	console.log(`started the server at port ${3000}`);
 });

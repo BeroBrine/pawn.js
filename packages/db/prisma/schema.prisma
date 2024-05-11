@@ -18,6 +18,7 @@ model User {
   name        String?
   username    String   @unique
   email       String   @unique
+  password    String
   gameAsWhite Game[]   @relation("gameAsWhite")
   gameAsBlack Game[]   @relation("gameAsBlack")
   createdAt   DateTime @default(now())
