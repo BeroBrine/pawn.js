@@ -1,5 +1,6 @@
 import Game from "../components/window/Game";
-import Landing from "../components/window/Landing";
+import Login from "../components/window/Login";
+import Landing from "../components/window/Login";
 
 export interface CustomRoute {
 	id: number;
@@ -11,8 +12,8 @@ export const useCustomRoute = (): CustomRoute[] => {
 	return [
 		{
 			id: 1,
-			route: "/",
-			element: Landing,
+			route: "/login",
+			element: Login,
 		},
 
 		{
