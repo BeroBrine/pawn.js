@@ -1,5 +1,5 @@
-import { Color, PieceSymbol, Square } from "chess.js";
-import React, { useState } from "react";
+import type { Color, PieceSymbol, Square, Chess } from "chess.js";
+import { type SetStateAction, useState, useId } from "react";
 import { Messages } from "./window/Game";
 import {
 	BlackBishop,
@@ -29,7 +29,12 @@ const ChessBoard = ({
 	setBoard,
 	board,
 	socket,
-}: { chess: any; setBoard: any; board: Board[][]; socket: WebSocket }) => {
+}: {
+	chess: Chess;
+	setBoard: React.Dispatch<SetStateAction<(Board | null)[][]>>;
+	board: Board[][];
+	socket: WebSocket;
+}) => {
 	const [from, setFrom] = useState<Square | null>(null);
 
 	const renderPiece = (elem: Board) => {
@@ -81,20 +86,20 @@ const ChessBoard = ({
 		<div className="w-full">
 			{board.map((row, i) => {
 				return (
-					<div key={i} className="flex w-full">
+					<div key={useId()} className="flex w-full">
 						{row.map((elem, j) => {
-							const squareRep = (String.fromCharCode(97 + (j % 8)) +
-								"" +
-								(8 - i)) as Square;
+							//biome-ignore format:
+							const squareRep = `${String.fromCharCode(97 + (j % 8))}${8 - i}` as Square;
 							const divId = squareRep as string;
 							return (
 								<div
 									id={divId}
+									onKeyUp={undefined}
+									onKeyDown={undefined}
 									onClick={(e: React.MouseEvent<HTMLDivElement>) => {
 										e.preventDefault();
 										const target = e.target as HTMLDivElement;
 										console.log(target.id);
-
 										if (!from) {
 											setFrom(squareRep);
 										} else {
@@ -110,16 +115,18 @@ const ChessBoard = ({
 											);
 											chess.move({ from, to: squareRep });
 											console.log("reached setBoard");
+											if (!setBoard) return new Error("setBoard error");
 											setBoard(chess.board());
 											setFrom(null);
 										}
 									}}
-									key={j}
+									key={useId()}
 									className={`${
-										// biome-ignore format
+										//biome-ignore:format
 										(i + j) % 2 === 0 ? "bg-red-200" : "bg-red-300"
 									} w-20 h-20 justify-center flex items-center`}
 								>
+									{squareRep}
 									{renderPiece(elem)}
 								</div>
 							);

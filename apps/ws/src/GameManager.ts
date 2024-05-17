@@ -1,5 +1,5 @@
-import { WebSocket } from "ws";
-import { Messages, message } from "./messages";
+import type { WebSocket } from "ws";
+import { Messages, type message } from "./messages";
 import { Game } from "./Game";
 
 export class GameManager {
@@ -26,6 +26,7 @@ export class GameManager {
 
 	private addHandler(socket: WebSocket) {
 		socket.on("message", (data) => {
+			console.log("the message is ", data.toString());
 			const message = ((): message | null => {
 				try {
 					const parse = JSON.parse(data.toString());
@@ -47,7 +48,6 @@ export class GameManager {
 			}
 
 			if (message.type === (Messages.MOVE as string)) {
-				console.log(this.games);
 				const game = this.games.find(
 					(game) => game.player1 === socket || game.player2 === socket,
 				);
