@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"@repo/ui": "*",
+		"@repo/statusCode": "*",
 		"@repo/zodValidation": "*",
 		"axios": "^1.6.8",
 		"react": "^18.2.0",

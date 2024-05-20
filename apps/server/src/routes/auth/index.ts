@@ -18,30 +18,34 @@ interface ILoginUser extends Request {
 	user?: dbUserZodType;
 }
 
-authRouter.get("/login", async (req: ILoginUser, res: Response) => {
-	const authHeader = req.headers.authorization;
+authRouter.post("/login", async (req: ILoginUser, res: Response) => {
+	console.log("inside the login ");
 	const body = req.body as loginBodyZodType;
-	const { success } = loginBodyZod.safeParse(body);
+	console.log(body);
+	const { error, success } = loginBodyZod.safeParse(body);
+	console.log(error);
 	const JWT_SEC = process.env.JWT_SECRET;
+	console.log(success);
 	if (!success)
 		return res
 			.status(STATUS_CODES.FORBIDDEN)
 			.json({ msg: "sent body is not valid" });
-	if (!authHeader) return res.json({ msg: "no auth header found" });
 	if (!JWT_SEC)
 		return res.status(STATUS_CODES.SERVER_ERROR).json({ msg: "server error" });
 
 	try {
+		console.log("finding user in db");
+		console.log("the body is", body);
 		const user = await findUserInDb(body);
 
-		console.log(user);
 		if (!user)
 			return res.status(STATUS_CODES.UNAUTH).json({ msg: "no user found" });
 
-		const verify = verifyPassword(user.password, body.password);
+		const verify = await verifyPassword(user.password, body.password);
+		console.log("the verify is ", verify);
 		if (!verify)
 			return res.status(STATUS_CODES.UNAUTH).json({ msg: "unauthorized" });
-
+		console.log("everything successfull");
 		req.user = user;
 		console.log(req.user);
 		const date = new Date();

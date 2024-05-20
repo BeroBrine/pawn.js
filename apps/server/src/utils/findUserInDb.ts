@@ -10,6 +10,7 @@ const findUserInDb = async (body: loginBodyZodType) => {
 		});
 		return user;
 	} catch (e) {
+		console.log(e);
 		throw new Error("error while finding user");
 	}
 };

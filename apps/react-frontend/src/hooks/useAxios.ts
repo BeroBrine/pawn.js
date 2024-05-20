@@ -8,8 +8,6 @@ import { useState } from "react";
 type axiosMethod = "POST" | "GET" | "PUT";
 type axiosBody = loginBodyZodType | signUpBodyZodType;
 
-type useAxiosReturnType = { loading: boolean; response: AxiosResponse } | null;
-
 const useAxios = async (
 	url: string,
 	data: axiosBody,
@@ -17,23 +15,38 @@ const useAxios = async (
 	axiosHeaders?: {
 		headers: RawAxiosRequestHeaders;
 	},
-): Promise<useAxiosReturnType> => {
-	const [loading, setLoading] = useState<boolean>(true);
+): Promise<{ loading: boolean; response: AxiosResponse } | undefined> => {
+	let loading = true;
 	switch (method) {
 		case "GET": {
-			const response = await axios.get(`${url}`);
-			setLoading(true);
-			return { loading, response };
+			try {
+				const response = await axios.get(`${url}`);
+				loading = false;
+				const returnObj = { loading, response };
+				return returnObj;
+			} catch (e) {
+				console.log(e);
+				throw new Error("Fetch Request Failed");
+			}
 		}
 
 		case "POST": {
-			if (!axiosHeaders) throw new Error("error in post request");
-			const response = await axios.post(`${url}`, data, axiosHeaders);
-			setLoading(true);
-			return { loading, response };
+			console.log("axiosHeaders are ", axiosHeaders);
+			try {
+				console.log("axiosHeaders are ", axiosHeaders);
+				if (!axiosHeaders) throw new Error("error in post request");
+				const response = await axios.post(`${url}`, data, axiosHeaders);
+				loading = false;
+				const returnObj = { loading, response };
+				return returnObj;
+			} catch (e) {
+				console.log("the error is ", e);
+				throw new Error("Post Request Failed");
+			}
 		}
 		default: {
-			return null;
+			console.log("no method specified");
+			break;
 		}
 	}
 };
