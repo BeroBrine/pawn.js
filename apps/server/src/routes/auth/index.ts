@@ -1,5 +1,10 @@
-import { type Request, type Response, Router } from "express";
-import { sign } from "jsonwebtoken";
+import {
+	type Request,
+	type Response,
+	Router,
+	type RequestHandler,
+} from "express";
+import { type JwtPayload, verify, sign } from "jsonwebtoken";
 import findUserInDb from "../../utils/findUserInDb";
 import {
 	loginBodyZod,
@@ -12,11 +17,21 @@ import { STATUS_CODES } from "@repo/statusCode/STATUS_CODES";
 import "dotenv/config";
 import prisma from "@repo/db/client";
 import { generateHash, verifyPassword } from "../../utils/passUtil";
-const authRouter = Router();
+import { authMiddleware } from "../../middlewares";
 
 interface ILoginUser extends Request {
 	user?: dbUserZodType;
 }
+
+const authRouter = Router();
+
+authRouter.get(
+	"/loggedIn",
+	authMiddleware as RequestHandler,
+	async (req: ILoginUser, res: Response) => {
+		return res.status(STATUS_CODES.OK).json({ msg: "loggedIn" });
+	},
+);
 
 authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 	console.log("inside the login ");
@@ -68,6 +83,7 @@ authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 		}
 
 		const token = sign({ userId: user.id }, JWT_SEC, { expiresIn: "1hr" });
+		res.cookie("_jwtToken", token);
 		return res
 			.status(STATUS_CODES.OK)
 			.json({ msg: "login successfull", token });
