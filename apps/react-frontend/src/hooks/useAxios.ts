@@ -6,7 +6,7 @@ import axios, { type AxiosResponse, type RawAxiosRequestHeaders } from "axios";
 import { useState } from "react";
 
 type axiosMethod = "POST" | "GET" | "PUT";
-type axiosBody = loginBodyZodType | signUpBodyZodType;
+export type axiosBody = loginBodyZodType | signUpBodyZodType;
 
 const useAxios = async (
 	url: string,
@@ -34,7 +34,6 @@ const useAxios = async (
 			console.log("axiosHeaders are ", axiosHeaders);
 			try {
 				console.log("axiosHeaders are ", axiosHeaders);
-				if (!axiosHeaders) throw new Error("error in post request");
 				const response = await axios.post(`${url}`, data, axiosHeaders);
 				loading = false;
 				const returnObj = { loading, response };

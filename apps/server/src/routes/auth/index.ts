@@ -94,6 +94,7 @@ authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 });
 
 authRouter.post("/signup", async (req: Request, res: Response) => {
+	console.log("signup req");
 	const body = req.body as signUpBodyZodType;
 	if (!body)
 		return res.status(STATUS_CODES.SERVER_ERROR).json({ msg: "no body found" });
