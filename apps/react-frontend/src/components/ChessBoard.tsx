@@ -94,12 +94,8 @@ const ChessBoard = ({
 							return (
 								<div
 									id={divId}
-									onKeyUp={undefined}
-									onKeyDown={undefined}
 									onClick={(e: React.MouseEvent<HTMLDivElement>) => {
 										e.preventDefault();
-										const target = e.target as HTMLDivElement;
-										console.log(target.id);
 										if (!from) {
 											setFrom(squareRep);
 										} else {
@@ -114,8 +110,8 @@ const ChessBoard = ({
 												}),
 											);
 											chess.move({ from, to: squareRep });
-											console.log("reached setBoard");
 											if (!setBoard) return new Error("setBoard error");
+
 											setBoard(chess.board());
 											setFrom(null);
 										}
@@ -124,9 +120,8 @@ const ChessBoard = ({
 									className={`${
 										//biome-ignore:format
 										(i + j) % 2 === 0 ? "bg-red-200" : "bg-red-300"
-									} w-20 h-20 justify-center flex items-center`}
+									} w-[80px] h-[80px] justify-center flex items-center`}
 								>
-									{squareRep}
 									{renderPiece(elem)}
 								</div>
 							);

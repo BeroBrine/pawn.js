@@ -12,34 +12,29 @@ export enum Messages {
 }
 
 const Game = () => {
-	//@ts-ignore
-	const [chess, setChess] = useState<Chess>(new Chess());
+	const chess = new Chess();
 	const [board, setBoard] = useState(chess.board());
 	const { socket, loading } = useSocket();
 
 	useEffect(() => {
 		if (!socket) {
-			console.log("returing early from socket");
 			return;
 		}
-		console.log("reached above the socket");
 		socket.onmessage = (event) => {
-			console.log(event);
 			const message = JSON.parse(event.data);
 			console.log(message.type);
 			switch (message.type) {
 				case Messages.INIT_GAME: {
-					console.log("in init game");
-					setBoard(chess.board());
-					console.log("game has started");
+					const newChess = new Chess();
+					setBoard(newChess.board());
 					break;
 				}
 				case Messages.MOVE: {
-					console.log("in move");
 					const move = message.payload;
-					console.log(move);
-					chess.move(move);
-					console.log(chess.ascii());
+					console.log(move.move);
+					const { to, from } = move.move;
+
+					chess.move({ to: to, from: from });
 					setBoard(chess.board());
 					break;
 				}
@@ -51,7 +46,7 @@ const Game = () => {
 					break;
 			}
 		};
-	}, [socket, chess]);
+	}, [socket, board]);
 
 	// TODO: cleanup fn
 
@@ -64,7 +59,7 @@ const Game = () => {
 		);
 	if (!socket) return;
 	return (
-		<div className="h-screen  p-8">
+		<div className="h-fit p-8">
 			<div className="w-1/2">
 				<ChessBoard
 					chess={chess}
