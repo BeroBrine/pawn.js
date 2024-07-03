@@ -1,28 +1,26 @@
+import type { clientSocket } from "@repo/interfaceAndEnums/IReceivedEvents";
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 const url = "ws://localhost:7777";
 
 export const useSocket = () => {
-	const [socket, setSocket] = useState<WebSocket | null>(null);
+	const [socket, setSocket] = useState<clientSocket | null>(null);
 	const [loading, setLoading] = useState(true);
 	console.log(url);
 	if (!url) throw new Error("web sock url failed");
 	useEffect(() => {
-		const ws = new WebSocket(url, "echo-protocol");
-		ws.onopen = () => {
-			console.log("opening");
-			setSocket(ws);
+		const socket = io(url) as clientSocket;
+		socket.on("connect", () => {
+			setSocket(socket);
 			setLoading(false);
-		};
-
-		ws.onclose = () => {
-			console.log("closing");
+		});
+		socket.on("disconnect", () => {
 			setSocket(null);
-
 			setLoading(true);
-		};
+		});
 		return () => {
-			ws.close();
+			socket.close();
 		};
 	}, []);
 

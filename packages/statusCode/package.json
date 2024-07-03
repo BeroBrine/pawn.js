@@ -1,9 +1,0 @@
-{
-	"name": "@repo/statusCode",
-	"version": "1.0.0",
-	"main": "index.js",
-	"license": "MIT",
-	"exports": {
-		"./STATUS_CODES": "./src/index.ts"
-	}
-}

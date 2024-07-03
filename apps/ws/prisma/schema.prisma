@@ -32,4 +32,3 @@ model Game {
   currentFen    String
   moves         String[]
 }
-

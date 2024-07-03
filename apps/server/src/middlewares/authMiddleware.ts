@@ -1,10 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import "dotenv/config";
-import prisma from "@repo/db/client";
-import type { loginBodyZodType } from "@repo/zodValidation/loginBodyZodType";
+import { prisma } from "@repo/db/client";
 import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
-import { STATUS_CODES } from "@repo/statusCode/STATUS_CODES";
+import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 
 interface IJwtToken {
 	userId: string;
@@ -21,7 +20,6 @@ interface ICookie {
 }
 
 const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
-	const body: loginBodyZodType = req.body;
 	const cookie = req.cookies as ICookie;
 	const token = cookie._jwtToken;
 	if (!token)

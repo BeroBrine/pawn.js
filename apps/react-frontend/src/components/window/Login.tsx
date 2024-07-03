@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useAxios from "../../hooks/useAxios";
-import axios from "axios";
 import type { AxiosResponse } from "axios";
-import { STATUS_CODES } from "@repo/statusCode/STATUS_CODES";
+import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 
 interface ILogin {
 	email: string;

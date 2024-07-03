@@ -1,0 +1,22 @@
+{
+	"name": "@repo/interfaceAndEnums",
+	"version": "1.0.0",
+	"main": "index.ts",
+	"license": "MIT",
+	"dependencies": {
+		"@repo/zodValidation": "*",
+		"chess.js": "^1.0.0-beta.8",
+		"socket.io": "^4.7.5",
+		"socket.io-client": "^4.7.5"
+	},
+	"exports": {
+		"./IReceivedEvents": "./src/index.ts",
+		"./ISentEvents": "./src/index.ts",
+		"./Socket": "./src/index.ts",
+		"./Messages": "./src/index.ts",
+		"./Colors": "./src/index.ts",
+		"./TMessage": "./src/index.ts",
+		"./STATUS_CODES": "./src/index.ts",
+		"./clientSocket": "./src/index.ts"
+	}
+}

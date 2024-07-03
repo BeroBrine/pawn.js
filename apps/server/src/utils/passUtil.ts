@@ -4,8 +4,7 @@ export const generateHash = async (
 ): Promise<string> => {
 	const encoder = new TextEncoder();
 
-	const salt = providedSalt ?? crypto.getRandomValues(new Uint8Array(16));
-
+	const salt = providedSalt ?? crypto.getRandomValues(new Uint8Array());
 	const keyMaterial = await crypto.subtle.importKey(
 		"raw",
 		encoder.encode(password),

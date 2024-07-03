@@ -5,7 +5,7 @@ import {
 	type RequestHandler,
 } from "express";
 import { type JwtPayload, verify, sign } from "jsonwebtoken";
-import findUserInDb from "../../utils/findUserInDb";
+
 import {
 	loginBodyZod,
 	signupBodyZod,
@@ -13,9 +13,9 @@ import {
 	type loginBodyZodType,
 } from "@repo/zodValidation/loginBodyZod";
 import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
-import { STATUS_CODES } from "@repo/statusCode/STATUS_CODES";
+import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 import "dotenv/config";
-import prisma from "@repo/db/client";
+import { prisma, findUserInDb } from "@repo/db/client";
 import { generateHash, verifyPassword } from "../../utils/passUtil";
 import { authMiddleware } from "../../middlewares";
 
