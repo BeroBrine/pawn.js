@@ -48,23 +48,26 @@ const Login = () => {
 	const navigate = useNavigate();
 
 	const handleClick = () => {
-		const bad = async () => {
-			const obj = (await useAxios(
-				"http://localhost:3000/auth/login",
-				{
+		(async () => {
+			console.log("requesting");
+			const obj = (await useAxios({
+				url: "http://localhost:3000/auth/login",
+				method: "POST",
+				data: {
 					email: userInput.email,
 					password: userInput.password,
 				},
-				"POST",
-			)) as TAxiosReturn;
-			setAxiosReturn(obj);
-		};
-		bad();
-		if (axiosReturn?.response.status === STATUS_CODES.OK) navigate("/game");
-		else {
-			alert("invalid username or password");
-		}
-		console.log("the axios return is ", axiosReturn);
+			})) as TAxiosReturn;
+
+			console.log("the axios return is ", obj);
+
+			if (obj?.response.status === STATUS_CODES.OK && obj.response.data.token) {
+				localStorage.setItem("token", obj.response.data.token);
+				navigate("/game");
+			} else {
+				alert("invalid username or password");
+			}
+		})();
 	};
 
 	return (
@@ -85,7 +88,13 @@ const Login = () => {
 					type="text"
 				/>
 			</div>
-			<Button handleClick={handleClick}>Click To Login</Button>
+			<button
+				onClick={handleClick}
+				type="button"
+				className="rounded-xl text-xl bg-black p-5 text-white font-bold"
+			>
+				Click To Login
+			</button>
 		</div>
 	);
 };

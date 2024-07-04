@@ -2,15 +2,16 @@ import { Chess, type Move } from "chess.js";
 import { Colors } from "@repo/interfaceAndEnums/Colors";
 import { Messages } from "@repo/interfaceAndEnums/Messages";
 import type { Socket } from "@repo/interfaceAndEnums/Socket";
+import type { User } from "./User";
 
 export class Game {
-	public player1: Socket;
-	public player2: Socket;
+	public player1: User;
+	public player2: User;
 	private board: Chess;
 	private moveHistory: Move[];
 	private startTime: Date;
 
-	constructor(player1: Socket, player2: Socket) {
+	constructor(player1: User, player2: User) {
 		console.log("init the game");
 
 		this.player1 = player1;
@@ -20,7 +21,7 @@ export class Game {
 
 		this.startTime = new Date();
 		try {
-			this.player1.emit("init_game", {
+			this.player1.socket.emit("init_game", {
 				type: Messages.INIT_GAME,
 				payload: {
 					color: Colors.WHITE,
@@ -29,7 +30,7 @@ export class Game {
 		} catch (e) {
 			console.error(e);
 		}
-		this.player2.emit("init_game", {
+		this.player2.socket.emit("init_game", {
 			type: Messages.INIT_GAME,
 			payload: {
 				color: Colors.BLACK as string,
@@ -50,14 +51,14 @@ export class Game {
 		}
 
 		if (this.board.isGameOver()) {
-			this.player1.emit("game_over", {
+			this.player1.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
 					winner: this.board.turn() === Colors.WHITE ? "black" : "white",
 				},
 			});
 
-			this.player2.emit("game_over", {
+			this.player2.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
 					winner: this.board.turn() === Colors.WHITE ? "black" : "white",
@@ -66,7 +67,7 @@ export class Game {
 		}
 		if (this.board.turn() === "w") {
 			console.log("send to 1");
-			this.player1.emit("move", {
+			this.player1.socket.emit("move", {
 				type: Messages.MOVE,
 				payload: {
 					move,
@@ -76,7 +77,7 @@ export class Game {
 			});
 		} else {
 			console.log("send to 2");
-			this.player2.emit("move", {
+			this.player2.socket.emit("move", {
 				type: Messages.MOVE,
 				payload: {
 					move,

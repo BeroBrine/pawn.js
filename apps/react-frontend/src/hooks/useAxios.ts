@@ -8,14 +8,19 @@ import { useState } from "react";
 type axiosMethod = "POST" | "GET" | "PUT";
 export type axiosBody = loginBodyZodType | signUpBodyZodType;
 
-const useAxios = async (
-	url: string,
-	data: axiosBody,
-	method: axiosMethod,
+const useAxios = async ({
+	url,
+	method,
+	data,
+	axiosHeaders,
+}: {
+	url: string;
+	method: axiosMethod;
+	data?: axiosBody;
 	axiosHeaders?: {
 		headers: RawAxiosRequestHeaders;
-	},
-): Promise<{ loading: boolean; response: AxiosResponse } | undefined> => {
+	};
+}): Promise<{ loading: boolean; response: AxiosResponse } | undefined> => {
 	let loading = true;
 	switch (method) {
 		case "GET": {
@@ -31,12 +36,13 @@ const useAxios = async (
 		}
 
 		case "POST": {
-			console.log("axiosHeaders are ", axiosHeaders);
 			try {
-				console.log("axiosHeaders are ", axiosHeaders);
+				console.log("posting");
 				const response = await axios.post(`${url}`, data, axiosHeaders);
 				loading = false;
+				console.log(response);
 				const returnObj = { loading, response };
+				console.log("returning");
 				return returnObj;
 			} catch (e) {
 				console.log("the error is ", e);

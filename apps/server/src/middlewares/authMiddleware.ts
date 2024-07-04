@@ -20,10 +20,14 @@ interface ICookie {
 }
 
 const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
-	const cookie = req.cookies as ICookie;
-	const token = cookie._jwtToken;
-	if (!token)
+	const authHeader = req.headers.authorization;
+	console.log(authHeader);
+	if (!authHeader)
 		return res.status(STATUS_CODES.UNAUTH).json({ msg: "Unauthorized" });
+	const token = authHeader.split(" ")[1];
+	if (!token || token === "null")
+		return res.status(STATUS_CODES.UNAUTH).json({ msg: "Unauthorized" });
+	console.log("still running");
 	const secret = process.env.JWT_SECRET ?? "";
 	const verified = verify(token, secret) as IJwtToken;
 	console.log(verified);

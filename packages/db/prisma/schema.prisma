@@ -37,17 +37,7 @@ model Game {
   moves         String[]
   status        GameStatus
   createdAt     DateTime   @default(now())
-  Move          Move[]
-}
-
-model Move {
-  id         String   @id @default(uuid())
-  gameId     String
-  game       Game     @relation(references: [id], fields: [gameId])
-  currentFen String
-  from       String
-  to         String
-  createdAt  DateTime @default(now())
+  Move          String[]
 }
 
 enum GameStatus {

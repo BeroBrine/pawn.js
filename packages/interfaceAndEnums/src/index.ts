@@ -10,10 +10,10 @@ export interface IReceivedEvents {
 		// conditonally checks on init_game that if it is a move or init game.
 		type: Messages.INIT_GAME;
 	}) => void;
-	userdata: (data: {
+	userid: (data: {
 		type: Messages.USER_DATA;
 		payload: {
-			userdata: dbUserZodType;
+			userid: string;
 		};
 	}) => void;
 	move: (data: {
@@ -28,6 +28,13 @@ export interface IReceivedEvents {
 }
 
 export interface ISentEvents {
+	sendGameToDb: () => void;
+	userid: (data: {
+		type: Messages.USER_DATA;
+		payload: {
+			userid: string;
+		};
+	}) => void;
 	init_game: (data: {
 		type: Messages.INIT_GAME;
 		payload: {
@@ -56,6 +63,22 @@ export interface ISentEvents {
 
 export type Socket = socket<IReceivedEvents, ISentEvents>;
 export type clientSocket = clSocket<ISentEvents, IReceivedEvents>;
+
+// express  socket
+export interface IExpressSendEvents {
+	setUserData: (data: dbUserZodType) => void;
+}
+
+export interface IExpressReceiveEvents {
+	getUserData: () => void;
+}
+
+export type ExpressSocket = socket<IExpressReceiveEvents, IExpressSendEvents>;
+
+export type ClientExpressSocket = clSocket<
+	IExpressSendEvents,
+	IExpressReceiveEvents
+>;
 
 // enums
 export enum Messages {

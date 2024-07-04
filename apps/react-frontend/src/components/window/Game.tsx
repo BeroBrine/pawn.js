@@ -3,20 +3,46 @@ import { Chess } from "chess.js";
 import Button from "../Button";
 import { useSocket } from "../../hooks/useSockets";
 import { Chessboard } from "react-chessboard";
-import { Messages } from "@repo/interfaceAndEnums/Messages";
+import { Messages, STATUS_CODES } from "@repo/interfaceAndEnums/Messages";
 import type {
 	BoardOrientation,
 	Square,
 } from "react-chessboard/dist/chessboard/types";
+import useAxios from "../../hooks/useAxios";
+import { useNavigate } from "react-router-dom";
 
 const Game = () => {
-	const [chess, setChess] = useState(new Chess());
+	const chess = new Chess();
 	const [board, setBoard] = useState(chess.board());
 	const [render, setRender] = useState<boolean>(false);
 	const [orientation, setOrientation] = useState<BoardOrientation | undefined>(
 		undefined,
 	);
 	const { socket, loading } = useSocket();
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		(async () => {
+			const token = localStorage.getItem("token");
+			console.log(token);
+			const axiosR = await useAxios({
+				url: "http://localhost:3000/auth/loggedIn",
+				method: "POST",
+				axiosHeaders: {
+					headers: {
+						withAuthorization: true,
+						Authorization: `token ${token}`,
+					},
+				},
+			});
+			console.log(axiosR);
+			if (axiosR?.response.status !== STATUS_CODES.OK) {
+				alert("please login");
+				navigate("/login");
+			}
+			console.log(axiosR);
+		})();
+	}, [navigate]);
 
 	const onDrop = (from: Square, to: Square) => {
 		socket?.emit("move", {

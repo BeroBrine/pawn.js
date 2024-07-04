@@ -1,11 +1,10 @@
-import { Messages } from "@repo/interfaceAndEnums/Messages";
 import { Game } from "./Game";
-import type { Socket } from "@repo/interfaceAndEnums/Socket";
+import type { User } from "./User";
 
 export class GameManager {
 	private games: Game[];
-	private pendingUser: Socket | null;
-	private users: Socket[];
+	private pendingUser: User | null;
+	private users: User[];
 
 	constructor() {
 		this.games = [];
@@ -13,54 +12,54 @@ export class GameManager {
 		this.pendingUser = null;
 	}
 
-	addUser(socket: Socket) {
-		this.users.push(socket);
+	addUser(user: User) {
+		this.users.push(user);
 		console.log("added user");
 
-		this.addHandler(socket);
+		this.addHandler(user);
 	}
 
-	removeUser(socket: Socket) {
-		console.log("user ", socket.id, " has left the game");
+	removeUser(user: User) {
+		console.log("user ", user.id, " has left the game");
 		const game = this.games.find(
-			(elem) => elem.player1.id === socket.id || elem.player2.id === socket.id,
+			(elem) => elem.player1.id === user.id || elem.player2.id === user.id,
 		);
-		this.users = this.users.filter((elem) => elem !== socket);
+		this.users = this.users.filter((elem) => elem !== user);
 		this.games = this.games.filter((elem) => elem !== game);
 	}
 
-	private addHandler(socket: Socket) {
-		socket.on("init_game", (data) => {
+	private addHandler(user: User) {
+		user.socket.on("init_game", (data) => {
 			const message = data;
 			if (!message) throw new Error("invalid message");
 			if (!this.pendingUser) {
-				this.pendingUser = socket;
+				this.pendingUser = user;
 			} else {
-				console.log("preparing new game with ", socket.id, this.pendingUser.id);
-				const game = new Game(this.pendingUser, socket);
+				console.log("preparing new game with ", user.id, this.pendingUser.id);
+				const game = new Game(this.pendingUser, user);
 				this.games.push(game);
 				this.pendingUser = null;
 			}
 		});
 
-		socket.on("move", (data) => {
+		user.socket.on("move", (data) => {
 			console.log("move");
 			const message = data;
 			const game = this.games.find(
-				(game) => game.player1 === socket || game.player2 === socket,
+				(game) => game.player1 === user || game.player2 === user,
 			);
 			if (!game) throw new Error("NO GAME FOUND");
 			if (!message.payload) {
 				throw new Error("No Payload");
 			}
-			game.makeMove(socket, message.payload.move);
+			game.makeMove(user.socket, message.payload.move);
 		});
 
-		socket.on("disconnect", () => {
+		user.socket.on("disconnect", () => {
 			console.log("removing the user");
 
 			console.log(this.users.length);
-			this.removeUser(socket);
+			this.removeUser(user);
 			console.log(this.users.length);
 		});
 	}

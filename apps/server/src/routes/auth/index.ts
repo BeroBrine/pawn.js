@@ -25,10 +25,10 @@ interface ILoginUser extends Request {
 
 const authRouter = Router();
 
-authRouter.get(
+authRouter.post(
 	"/loggedIn",
 	authMiddleware as RequestHandler,
-	async (req: ILoginUser, res: Response) => {
+	(req: ILoginUser, res: Response) => {
 		return res.status(STATUS_CODES.OK).json({ msg: "loggedIn" });
 	},
 );
@@ -81,12 +81,8 @@ authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 				.status(STATUS_CODES.SERVER_ERROR)
 				.json({ msg: "internal server error" });
 		}
-
 		const token = sign({ userId: user.id }, JWT_SEC, { expiresIn: "1hr" });
-		res.cookie("_jwtToken", token);
-		return res
-			.status(STATUS_CODES.OK)
-			.json({ msg: "login successfull", token });
+		return res.status(STATUS_CODES.OK).json({ token: token });
 	} catch (e) {
 		console.log(e);
 		return res.status(STATUS_CODES.SERVER_ERROR).json({ msg: "server error" });
