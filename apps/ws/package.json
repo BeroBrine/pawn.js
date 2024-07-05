@@ -11,8 +11,8 @@
 	},
 	"dependencies": {
 		"@prisma/client": "5.13.0",
-		"@repo/interfaceAndEnums": "*",
 		"@repo/db": "*",
+		"@repo/interfaceAndEnums": "*",
 		"@types/node": "^20.12.7",
 		"@types/ws": "^8.5.10",
 		"chess.js": "^1.0.0-beta.8",
