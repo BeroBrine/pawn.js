@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import "dotenv/config";
-import { prisma } from "@repo/db/client";
+import prisma from "@repo/db/prisma";
 import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
 import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 
@@ -13,10 +13,6 @@ interface IJwtToken {
 
 export interface ILoginUser extends Request {
 	user?: dbUserZodType;
-}
-
-interface ICookie {
-	_jwtToken: string;
 }
 
 const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {

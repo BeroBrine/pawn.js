@@ -1,24 +1,23 @@
 {
-	"name": "pawn.js",
-	"private": true,
-	"scripts": {
-		"build": "turbo build",
-		"dev": "turbo dev",
-		"lint": "turbo lint",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\""
-	},
-	"devDependencies": {
-		"@repo/eslint-config": "*",
-		"@repo/typescript-config": "*",
-		"prettier": "^3.2.5",
-		"turbo": "latest"
-	},
-	"engines": {
-		"node": ">=18"
-	},
-	"packageManager": "yarn@4.3.1",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	]
+  "name": "pawn.js",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.6",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "yarn@4.3.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

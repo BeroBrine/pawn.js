@@ -11,10 +11,11 @@ import {
 	signupBodyZod,
 	type signUpBodyZodType,
 	type loginBodyZodType,
-} from "@repo/zodValidation/loginBodyZod";
+} from "@repo/zodValidation/loginBodyZodType";
 import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 import "dotenv/config";
-import { prisma, findUserInDb } from "@repo/db/client";
+import prisma from "@repo/db/prisma";
+import { findUserInDb } from "@repo/db/prisma";
 import { generateHash, verifyPassword } from "../../utils/passUtil";
 import { authMiddleware } from "../../middlewares";
 import type { ILoginUser } from "../../middlewares/authMiddleware";

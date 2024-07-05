@@ -43,8 +43,8 @@ export class GameManager {
 				this.pendingUser.color = "white";
 				user.color = "black";
 				this.games.push(game);
-				this.pendingUser.addGameToDb(game, user);
-				user.addGameToDb(game, this.pendingUser);
+				// this.pendingUser.addGameToDb(game, user);
+				// user.addGameToDb(game, this.pendingUser);
 				this.pendingUser = null;
 			}
 		});
