@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import Button from "../Button";
 import { useState } from "react";
 import useAxios from "../../hooks/useAxios";
 import type { AxiosResponse } from "axios";
@@ -22,8 +21,6 @@ const Login = () => {
 		email: "",
 		password: "",
 	});
-
-	const [axiosReturn, setAxiosReturn] = useState<TAxiosReturn | null>(null);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		console.log(userInput);
@@ -62,6 +59,7 @@ const Login = () => {
 			console.log("the axios return is ", obj);
 
 			if (obj?.response.status === STATUS_CODES.OK && obj.response.data.token) {
+				localStorage.removeItem("token");
 				localStorage.setItem("token", obj.response.data.token);
 				navigate("/game");
 			} else {

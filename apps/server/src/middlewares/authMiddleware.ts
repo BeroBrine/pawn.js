@@ -12,7 +12,7 @@ interface IJwtToken {
 }
 
 export interface ILoginUser extends Request {
-	user: dbUserZodType;
+	user?: dbUserZodType;
 }
 
 interface ICookie {
@@ -21,7 +21,6 @@ interface ICookie {
 
 const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
 	const authHeader = req.headers.authorization;
-	console.log(authHeader);
 	if (!authHeader)
 		return res.status(STATUS_CODES.UNAUTH).json({ msg: "Unauthorized" });
 	const token = authHeader.split(" ")[1];
@@ -40,7 +39,6 @@ const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
 					id: verified.userId,
 				},
 			})) as dbUserZodType;
-			console.log(dbUser);
 			req.user = dbUser;
 			next();
 		} catch (e) {

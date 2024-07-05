@@ -3,7 +3,10 @@ import App from "./App.tsx";
 import "./globals.css";
 import { BrowserRouter } from "react-router-dom";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+const root = document.getElementById("root");
+
+//@ts-ignore
+ReactDOM.createRoot(root).render(
 	<BrowserRouter>
 		<App />
 	</BrowserRouter>,

@@ -14,7 +14,7 @@ export class GameManager {
 
 	addUser(user: User) {
 		this.users.push(user);
-		console.log("added user");
+		console.log(user.dbId);
 
 		this.addHandler(user);
 	}
@@ -32,12 +32,19 @@ export class GameManager {
 		user.socket.on("init_game", (data) => {
 			const message = data;
 			if (!message) throw new Error("invalid message");
+			console.log("in the init game");
+
+			console.log("in the init game");
 			if (!this.pendingUser) {
 				this.pendingUser = user;
 			} else {
 				console.log("preparing new game with ", user.id, this.pendingUser.id);
 				const game = new Game(this.pendingUser, user);
+				this.pendingUser.color = "white";
+				user.color = "black";
 				this.games.push(game);
+				this.pendingUser.addGameToDb(game, user);
+				user.addGameToDb(game, this.pendingUser);
 				this.pendingUser = null;
 			}
 		});
@@ -48,11 +55,14 @@ export class GameManager {
 			const game = this.games.find(
 				(game) => game.player1 === user || game.player2 === user,
 			);
-			if (!game) throw new Error("NO GAME FOUND");
+			if (!game) {
+				console.log("nogame");
+				return;
+			}
 			if (!message.payload) {
 				throw new Error("No Payload");
 			}
-			game.makeMove(user.socket, message.payload.move);
+			game.makeMove(message.payload.move);
 		});
 
 		user.socket.on("disconnect", () => {

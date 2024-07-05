@@ -4,7 +4,7 @@ import {
 	Router,
 	type RequestHandler,
 } from "express";
-import { type JwtPayload, verify, sign } from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 
 import {
 	loginBodyZod,
@@ -12,16 +12,12 @@ import {
 	type signUpBodyZodType,
 	type loginBodyZodType,
 } from "@repo/zodValidation/loginBodyZod";
-import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
 import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 import "dotenv/config";
 import { prisma, findUserInDb } from "@repo/db/client";
 import { generateHash, verifyPassword } from "../../utils/passUtil";
 import { authMiddleware } from "../../middlewares";
-
-interface ILoginUser extends Request {
-	user?: dbUserZodType;
-}
+import type { ILoginUser } from "../../middlewares/authMiddleware";
 
 const authRouter = Router();
 
@@ -29,7 +25,9 @@ authRouter.post(
 	"/loggedIn",
 	authMiddleware as RequestHandler,
 	(req: ILoginUser, res: Response) => {
-		return res.status(STATUS_CODES.OK).json({ msg: "loggedIn" });
+		return res
+			.status(STATUS_CODES.OK)
+			.json({ msg: "loggedIn", userId: req.user?.id });
 	},
 );
 

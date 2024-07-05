@@ -1,7 +1,6 @@
 import { Chess, type Move } from "chess.js";
 import { Colors } from "@repo/interfaceAndEnums/Colors";
 import { Messages } from "@repo/interfaceAndEnums/Messages";
-import type { Socket } from "@repo/interfaceAndEnums/Socket";
 import type { User } from "./User";
 
 export class Game {
@@ -18,8 +17,8 @@ export class Game {
 		this.player2 = player2;
 		this.board = new Chess();
 		this.moveHistory = [];
-
 		this.startTime = new Date();
+
 		try {
 			this.player1.socket.emit("init_game", {
 				type: Messages.INIT_GAME,
@@ -38,9 +37,8 @@ export class Game {
 		});
 	}
 
-	makeMove(socket: Socket, move: { from: string; to: string }) {
+	makeMove(move: { from: string; to: string }) {
 		try {
-			// add strictness here by including the strict flag
 			console.log(this.board.turn());
 			const latestMove = this.board.move(move);
 			console.log(latestMove);

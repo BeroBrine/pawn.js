@@ -14,11 +14,11 @@ function SignUp() {
 
 	const handleClick = async () => {
 		if (!userInputs) return;
-		const { response } = (await useAxios(
-			"http://localhost:3000/auth/signup",
-			userInputs,
-			"POST",
-		)) as { response: AxiosResponse };
+		const { response } = (await useAxios({
+			url: "http://localhost:3000/auth/signup",
+			method: "POST",
+			data: userInputs,
+		})) as { response: AxiosResponse };
 		console.log(response);
 	};
 
