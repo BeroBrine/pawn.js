@@ -1,7 +1,7 @@
 import type { Socket as socket } from "socket.io";
 import type { Socket as clSocket } from "socket.io-client";
 import type { Move } from "chess.js";
-import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
+import type { dbUserZod } from "@repo/db/game";
 
 export interface IReceivedEvents {
 	basicEmit: (emit: string, callback: (e: number) => void) => void;
@@ -66,7 +66,7 @@ export type clientSocket = clSocket<ISentEvents, IReceivedEvents>;
 
 // express  socket
 export interface IExpressSendEvents {
-	setUserData: (data: dbUserZodType) => void;
+	setUserData: (data: dbUserZod) => void;
 }
 
 export interface IExpressReceiveEvents {

@@ -6,19 +6,19 @@ import {
 } from "express";
 import { sign } from "jsonwebtoken";
 
-import {
-	loginBodyZod,
-	signupBodyZod,
-	type signUpBodyZodType,
-	type loginBodyZodType,
-} from "@repo/zodValidation/loginBodyZodType";
 import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 import "dotenv/config";
-import prisma from "@repo/db/prisma";
-import { findUserInDb } from "@repo/db/prisma";
+import { db } from "@repo/db/db";
 import { generateHash, verifyPassword } from "../../utils/passUtil";
 import { authMiddleware } from "../../middlewares";
 import type { ILoginUser } from "../../middlewares/authMiddleware";
+import {
+	type dbUserZod,
+	dbUserZodSchema,
+	loginSchema,
+	users,
+} from "@repo/db/game";
+import { eq } from "drizzle-orm";
 
 const authRouter = Router();
 
@@ -28,15 +28,15 @@ authRouter.post(
 	(req: ILoginUser, res: Response) => {
 		return res
 			.status(STATUS_CODES.OK)
-			.json({ msg: "loggedIn", userId: req.user?.id });
+			.json({ msg: "loggedIn", userId: req.userId });
 	},
 );
 
 authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 	console.log("inside the login ");
-	const body = req.body as loginBodyZodType;
+	const body = req.body;
 	console.log(body);
-	const { error, success } = loginBodyZod.safeParse(body);
+	const { error, success } = loginSchema.safeParse(body);
 	console.log(error);
 	const JWT_SEC = process.env.JWT_SECRET;
 	console.log(success);
@@ -50,37 +50,34 @@ authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 	try {
 		console.log("finding user in db");
 		console.log("the body is", body);
-		const user = await findUserInDb(body);
+		const user = await db
+			.select()
+			.from(users)
+			.where(eq(users.email, body.email));
 
 		if (!user)
 			return res.status(STATUS_CODES.UNAUTH).json({ msg: "no user found" });
 
-		const verify = await verifyPassword(user.password, body.password);
+		const verify = await verifyPassword(user[0].password, body.password);
 		console.log("the verify is ", verify);
 		if (!verify)
 			return res.status(STATUS_CODES.UNAUTH).json({ msg: "unauthorized" });
 		console.log("everything successfull");
-		req.user = user;
-		console.log(req.user);
+		req.userId = user[0].id;
 		const date = new Date();
-		date.toISOString();
+		const strDate = date.toISOString();
 		try {
-			await prisma.user.update({
-				where: {
-					username: user.username,
-					email: user.email,
-				},
-				data: {
-					lastLogin: date,
-				},
-			});
+			await db
+				.update(users)
+				.set({ lastLogin: strDate })
+				.where(eq(users.id, user[0].id));
 		} catch (e) {
 			console.log(e);
 			return res
 				.status(STATUS_CODES.SERVER_ERROR)
 				.json({ msg: "internal server error" });
 		}
-		const token = sign({ userId: user.id }, JWT_SEC, { expiresIn: "1hr" });
+		const token = sign({ userId: user[0].id }, JWT_SEC, { expiresIn: "1hr" });
 		return res.status(STATUS_CODES.OK).json({ token: token });
 	} catch (e) {
 		console.log(e);
@@ -90,10 +87,14 @@ authRouter.post("/login", async (req: ILoginUser, res: Response) => {
 
 authRouter.post("/signup", async (req: Request, res: Response) => {
 	console.log("signup req");
-	const body = req.body as signUpBodyZodType;
-	if (!body)
+	if (!req.body)
 		return res.status(STATUS_CODES.SERVER_ERROR).json({ msg: "no body found" });
-	const { success } = signupBodyZod.safeParse(body);
+	const { success } = dbUserZodSchema.safeParse(req.body);
+	const body = req.body as dbUserZod;
+	if (!success)
+		return res
+			.status(STATUS_CODES.FORBIDDEN)
+			.json({ msg: "the sent body is wrong" });
 	if (!process.env.PASS_SALT)
 		return res
 			.status(STATUS_CODES.SERVER_ERROR)
@@ -102,21 +103,13 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 		Array.from(process.env.PASS_SALT).map((letter) => letter.charCodeAt(0)),
 	);
 	const genHash = await generateHash(body.password, uint8Salt);
-	if (!success)
-		return res
-			.status(STATUS_CODES.FORBIDDEN)
-			.json({ msg: "the sent body is wrong" });
-	const date = new Date();
-	date.toISOString();
 	try {
-		const user = await prisma.user.create({
-			data: {
-				username: body.username,
-				name: body.name,
-				email: body.email,
-				password: genHash,
-				lastLogin: date,
-			},
+		const user = await db.insert(users).values({
+			email: body.email,
+			username: body.username,
+			password: genHash,
+			gamesAsBlack: new Array<string>(),
+			gamesAsWhite: new Array<string>(),
 		});
 		console.log(user);
 	} catch (e) {

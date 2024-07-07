@@ -1,9 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import "dotenv/config";
-import prisma from "@repo/db/prisma";
-import type { dbUserZodType } from "@repo/zodValidation/dbUserZodType";
 import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
+import { db } from "@repo/db/db";
+import { users } from "@repo/db/game";
+import { eq } from "drizzle-orm";
 
 interface IJwtToken {
 	userId: string;
@@ -12,7 +13,7 @@ interface IJwtToken {
 }
 
 export interface ILoginUser extends Request {
-	user?: dbUserZodType;
+	userId?: string;
 }
 
 const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
@@ -30,12 +31,13 @@ const authMiddleware = (req: ILoginUser, res: Response, next: NextFunction) => {
 		return res.status(STATUS_CODES.UNAUTH).json({ msg: "Unauthorized" });
 	(async () => {
 		try {
-			const dbUser = (await prisma.user.findFirst({
-				where: {
-					id: verified.userId,
-				},
-			})) as dbUserZodType;
-			req.user = dbUser;
+			const dbUser = await db
+				.select({
+					field: users.id,
+				})
+				.from(users)
+				.where(eq(users.id, verified.userId));
+			req.userId = dbUser[0].field;
 			next();
 		} catch (e) {
 			console.log(e);

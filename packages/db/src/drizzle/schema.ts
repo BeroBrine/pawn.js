@@ -8,6 +8,8 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import type { z } from "zod";
 
 export const stat = pgEnum("stat", [
 	"GOING_ON",
@@ -65,3 +67,14 @@ export const users = pgTable(
 		};
 	},
 );
+
+export const dbUserZodSchema = createInsertSchema(users);
+export type dbUserZod = z.infer<typeof dbUserZodSchema>;
+export const dbUserSelectZodSchema = createSelectSchema(users);
+
+export type dbUserSelectZod = z.infer<typeof dbUserSelectZodSchema>;
+
+export const loginSchema = dbUserSelectZodSchema.pick({
+	email: true,
+	password: true,
+});

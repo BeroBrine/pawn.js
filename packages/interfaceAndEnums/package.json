@@ -5,7 +5,7 @@
 	"packageManager": "yarn@4.3.1",
 	"license": "MIT",
 	"dependencies": {
-		"@repo/zodValidation": "*",
+		"@repo/db": "*",
 		"chess.js": "^1.0.0-beta.8",
 		"socket.io": "^4.7.5",
 		"socket.io-client": "^4.7.5"
