@@ -5,14 +5,19 @@
 	"dependencies": {
 		"@prisma/client": "^5.16.1",
 		"@repo/zodValidation": "*",
+		"dotenv": "^16.4.5",
+		"drizzle-kit": "^0.22.8",
+		"drizzle-orm": "^0.31.2",
+		"postgres": "^3.4.4",
 		"prisma": "^5.16.1"
 	},
 	"scripts": {
-		"db:generate": "prisma generate",
-		"db:push": "prisma db push --skip-generate"
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "tsx ./src/migrate.ts"
 	},
 	"exports": {
-		"./prisma": "./src/index.ts",
-		"./findUserInDb": "./src/index.ts"
+		"./db": "./src/index.ts",
+		"./game": "./src/drizzle/schema.ts",
+		"./users": "./src/drizzle/schema.ts"
 	}
 }

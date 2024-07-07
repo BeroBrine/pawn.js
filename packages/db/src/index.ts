@@ -1,30 +1,9 @@
-import { PrismaClient } from "@prisma/client";
-import { loginBodyZodType } from "@repo/zodValidation/loginBodyZodType";
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-const prismaClientSingleton = () => {
-	return new PrismaClient();
-};
+console.log(process.env.DATABASE_URL);
 
-declare const globalThis: {
-	prismaGlobal: ReturnType<typeof prismaClientSingleton>;
-} & typeof global;
+const queryClient = postgres(process.env.DATABASE_URL ?? "");
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
-
-export default prisma;
-
-if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
-
-export const findUserInDb = async (body: loginBodyZodType) => {
-	try {
-		const user = await prisma.user.findFirst({
-			where: {
-				email: body.email,
-			},
-		});
-		return user;
-	} catch (e) {
-		console.log(e);
-		throw new Error("Internal Db Error");
-	}
-};
+export const db = drizzle(queryClient);

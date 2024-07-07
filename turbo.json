@@ -11,11 +11,14 @@
 			"dependsOn": ["^lint"]
 		},
 		"dev": {
-			"dependsOn": ["^db:generate"],
+			"dependsOn": ["^db:generate", "^db:migrate"],
 			"cache": false,
 			"persistent": true
 		},
 		"db:generate": {
+			"cache": false
+		},
+		"db:migrate": {
 			"cache": false
 		}
 	}

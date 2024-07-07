@@ -1,0 +1,200 @@
+{
+  "id": "9e5317e1-0380-42ed-a2f1-34943730ce3d",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.game": {
+      "name": "game",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "player1id": {
+          "name": "player1id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player2id": {
+          "name": "player2id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gameStatus": {
+          "name": "gameStatus",
+          "type": "stat",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "startingFen": {
+          "name": "startingFen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'"
+        },
+        "currentFen": {
+          "name": "currentFen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "startAt": {
+          "name": "startAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "game_player1id_users_id_fk": {
+          "name": "game_player1id_users_id_fk",
+          "tableFrom": "game",
+          "tableTo": "users",
+          "columnsFrom": [
+            "player1id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "game_player2id_users_id_fk": {
+          "name": "game_player2id_users_id_fk",
+          "tableFrom": "game",
+          "tableTo": "users",
+          "columnsFrom": [
+            "player2id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gamesAsWhite": {
+          "name": "gamesAsWhite",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gamesAsBlack": {
+          "name": "gamesAsBlack",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "lastLogin": {
+          "name": "lastLogin",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {
+    "public.stat": {
+      "name": "stat",
+      "schema": "public",
+      "values": [
+        "GOING_ON",
+        "COMPLETED",
+        "ABANDON",
+        "PLAYER_LEFT"
+      ]
+    },
+    "public.statusEnum": {
+      "name": "statusEnum",
+      "schema": "public",
+      "values": [
+        "COMPLETED",
+        "ABANDON",
+        "PLAYER_LEFT",
+        "GOING_ON"
+      ]
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
