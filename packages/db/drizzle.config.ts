@@ -18,16 +18,4 @@ export default defineConfig({
 			ca: fs.readFileSync(`${__dirname}/ca.pem`).toString(),
 		},
 	},
-
-	// dbCredentials: {
-	//   user: "avnadmin",
-	//   password: "AVNS_smxDbBtKUBEygUN7Yx6",
-	//   host: "pg-2671a67f-abhishekrana8818-3277.b.aivencloud.com",
-	//   port: 23371,
-	//   database: "website_db",
-	//   ssl: {
-	//     rejectUnauthorized: true,
-	//     ca: fs.readFileSync(`${__dirname}/ca.pem`).toString(),
-	//   },
-	// },
 });

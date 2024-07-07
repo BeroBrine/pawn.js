@@ -1,6 +1,6 @@
 {
-  "id": "5fb6d656-e1b3-4890-bcf3-41c2a318be99",
-  "prevId": "8923ca86-8a6c-4c03-bdba-4c7baa36b09b",
+  "id": "3487bea6-9e3a-488d-81ec-47b9ea673fc4",
+  "prevId": "5fb6d656-e1b3-4890-bcf3-41c2a318be99",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -147,6 +147,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "moves": {
+          "name": "moves",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -157,6 +163,19 @@
           "tableTo": "game",
           "columnsFrom": [
             "gameId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "move_moves_moveHistory_id_fk": {
+          "name": "move_moves_moveHistory_id_fk",
+          "tableFrom": "move",
+          "tableTo": "moveHistory",
+          "columnsFrom": [
+            "moves"
           ],
           "columnsTo": [
             "id"

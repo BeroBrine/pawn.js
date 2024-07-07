@@ -6,8 +6,6 @@ import type { dbUserZod } from "@repo/db/game";
 export interface IReceivedEvents {
 	basicEmit: (emit: string, callback: (e: number) => void) => void;
 	init_game: (data: {
-		// the logic is written in such a way that it
-		// conditonally checks on init_game that if it is a move or init game.
 		type: Messages.INIT_GAME;
 	}) => void;
 	userid: (data: {
@@ -53,6 +51,7 @@ export interface ISentEvents {
 			turn: "white" | "black";
 		};
 	}) => void;
+	playerDisconnect: () => void;
 	game_over: (data: {
 		type: Messages.GAME_OVER;
 		payload: {

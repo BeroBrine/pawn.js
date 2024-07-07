@@ -44,29 +44,36 @@ const Game = () => {
 				navigate("/login");
 			}
 		})();
-	}, []);
+	}, [navigate]);
 
-	socket?.on("init_game", (data) => {
-		console.log("inside init game");
-		if (data.payload.color === "b") setOrientation("black");
-		else setOrientation("white");
-		setRender(true);
-	});
+	useEffect(() => {
+		socket?.on("init_game", (data) => {
+			console.log("inside init game");
+			if (data.payload.color === "b") setOrientation("black");
+			else setOrientation("white");
+			setRender(true);
+		});
 
-	socket?.on("move", (data) => {
-		console.log("move");
-		const { to, from } = data.payload.move;
-		const result = chess.move({ to: to, from: from });
-		console.log(result);
+		socket?.on("move", (data) => {
+			console.log("move");
+			const { to, from } = data.payload.move;
+			const result = chess.move({ to: to, from: from });
+			console.log(result);
 
-		console.log("on move turn before setting the board is ", chess.turn());
-		setBoard(chess.board());
-		console.log("on move turn now is ", chess.turn());
-	});
+			console.log("on move turn before setting the board is ", chess.turn());
+			setBoard(chess.board());
+			console.log("on move turn now is ", chess.turn());
+		});
 
-	socket?.on("game_over", () => {
-		console.log("game over");
-	});
+		socket?.on("playerDisconnect", () => {
+			alert("opponent has left the game");
+			setRender(false);
+		});
+
+		socket?.on("game_over", () => {
+			console.log("game over");
+		});
+	}, [socket, chess]);
 
 	const onDrop = (from: Square, to: Square) => {
 		socket?.emit("move", {

@@ -1,6 +1,6 @@
 {
-  "id": "00000000-0000-0000-0000-000000000000",
-  "prevId": "",
+  "id": "8923ca86-8a6c-4c03-bdba-4c7baa36b09b",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -52,15 +52,53 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "result": {
+          "name": "result",
+          "type": "result",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'in_progress'"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "gameStatus": {
+          "name": "gameStatus",
+          "columns": [
+            {
+              "expression": "gameStatus",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "result": {
+          "name": "result",
+          "columns": [
+            {
+              "expression": "result",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "game_player1id_users_id_fk": {
           "name": "game_player1id_users_id_fk",
           "tableFrom": "game",
           "tableTo": "users",
-          "schemaTo": "public",
           "columnsFrom": [
             "player1id"
           ],
@@ -74,7 +112,6 @@
           "name": "game_player2id_users_id_fk",
           "tableFrom": "game",
           "tableTo": "users",
-          "schemaTo": "public",
           "columnsFrom": [
             "player2id"
           ],
@@ -87,6 +124,69 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
+    },
+    "public.move": {
+      "name": "move",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gameId": {
+          "name": "gameId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from": {
+          "name": "from",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to": {
+          "name": "to",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "playerColor": {
+          "name": "playerColor",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "move_gameId_game_id_fk": {
+          "name": "move_gameId_game_id_fk",
+          "tableFrom": "move",
+          "tableTo": "game",
+          "columnsFrom": [
+            "gameId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      }
     },
     "public.users": {
       "name": "users",
@@ -127,15 +227,13 @@
           "name": "gamesAsWhite",
           "type": "uuid[]",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'RRAY['"
+          "notNull": true
         },
         "gamesAsBlack": {
           "name": "gamesAsBlack",
           "type": "uuid[]",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'RRAY['"
+          "notNull": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -157,66 +255,55 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "username"
-          ],
-          "nullsNotDistinct": false,
-          "name": "users_username_unique"
+          ]
         },
         "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false,
-          "name": "users_email_unique"
+          ]
         }
       }
     }
   },
   "enums": {
+    "public.color": {
+      "name": "color",
+      "schema": "public",
+      "values": [
+        "white",
+        "black"
+      ]
+    },
+    "public.result": {
+      "name": "result",
+      "schema": "public",
+      "values": [
+        "white",
+        "black",
+        "in_progress"
+      ]
+    },
     "public.stat": {
       "name": "stat",
+      "schema": "public",
       "values": [
         "GOING_ON",
         "COMPLETED",
         "ABANDON",
         "PLAYER_LEFT"
-      ],
-      "schema": "public"
-    },
-    "public.statusEnum": {
-      "name": "statusEnum",
-      "values": [
-        "COMPLETED",
-        "ABANDON",
-        "PLAYER_LEFT",
-        "GOING_ON"
-      ],
-      "schema": "public"
+      ]
     }
   },
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
-    "tables": {
-      "users": {
-        "columns": {
-          "gamesAsWhite": {
-            "isArray": true,
-            "dimensions": 1,
-            "rawType": "uuid"
-          },
-          "gamesAsBlack": {
-            "isArray": true,
-            "dimensions": 1,
-            "rawType": "uuid"
-          }
-        }
-      }
-    }
+    "tables": {}
   }
 }

@@ -25,6 +25,8 @@
 		"./loginSchema": "./src/drizzle/schema.ts",
 		"./dbUserSelectZodSchema": "./src/drizzle/schema.ts",
 		"./dbUserZod": "./src/drizzle/schema.ts",
-		"./dbUserSelectZod": "./src/drizzle/schema.ts"
+		"./dbUserSelectZod": "./src/drizzle/schema.ts",
+		"./SquareDb": "./src/drizzle/schema.ts",
+		"./PieceSymbolDb": "./src/drizzle/schema.ts"
 	}
 }

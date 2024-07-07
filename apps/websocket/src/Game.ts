@@ -1,10 +1,10 @@
-import { Chess, type Move } from "chess.js";
+import { Chess, type Square, type Move } from "chess.js";
 import { Colors } from "@repo/interfaceAndEnums/Colors";
 import { Messages } from "@repo/interfaceAndEnums/Messages";
 import type { User } from "./User";
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db/db";
-import { game, users } from "@repo/db/game";
+import { game, move, users } from "@repo/db/game";
 import { eq, or } from "drizzle-orm";
 
 export class Game {
@@ -13,7 +13,6 @@ export class Game {
 	public id: string;
 	private board: Chess;
 	private moveHistory: Move[];
-	private startTime: Date;
 
 	constructor(player1: User, player2: User) {
 		console.log("init the game");
@@ -22,18 +21,13 @@ export class Game {
 		this.player2 = player2;
 		this.board = new Chess();
 		this.moveHistory = [];
-		this.startTime = new Date();
 
-		try {
-			this.player1.socket.emit("init_game", {
-				type: Messages.INIT_GAME,
-				payload: {
-					color: Colors.WHITE,
-				},
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		this.player1.socket.emit("init_game", {
+			type: Messages.INIT_GAME,
+			payload: {
+				color: Colors.WHITE,
+			},
+		});
 		this.player2.socket.emit("init_game", {
 			type: Messages.INIT_GAME,
 			payload: {
@@ -41,6 +35,13 @@ export class Game {
 			},
 		});
 		this.createGameInDb();
+
+		this.player1.socket.on("disconnect", () => {
+			this.player2.socket.emit("playerDisconnect");
+		});
+		this.player2.socket.on("disconnect", () => {
+			this.player1.socket.emit("playerDisconnect");
+		});
 	}
 
 	makeMove(move: { from: string; to: string }) {
@@ -126,5 +127,22 @@ export class Game {
 				gamesAsBlack: blackUserArr,
 			})
 			.where(eq(users.id, userQuery[1].id));
+
+		await db.insert(move).values({
+			gameId: this.id,
+		});
+	}
+
+	private async updateMovesAndGame(
+		from: Square,
+		to: Square,
+		color: "white" | "black",
+		data: string[],
+	) {
+		await db.transaction(async (tx) => {
+			await tx.update(move).set({
+				data,
+			});
+		});
 	}
 }
