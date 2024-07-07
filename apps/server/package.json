@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"packageManager": "yarn@4.3.1",
 	"scripts": {
-		"dev": "nodemon src/index.ts"
+		"dev": "tsx watch src/index.ts"
 	},
 	"dependencies": {
 		"@repo/db": "*",

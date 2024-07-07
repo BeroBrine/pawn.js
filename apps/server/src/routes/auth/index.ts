@@ -89,8 +89,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 	console.log("signup req");
 	if (!req.body)
 		return res.status(STATUS_CODES.SERVER_ERROR).json({ msg: "no body found" });
-	const { success } = dbUserZodSchema.safeParse(req.body);
-	const body = req.body as dbUserZod;
+	const { success, data } = dbUserZodSchema.safeParse(req.body);
 	if (!success)
 		return res
 			.status(STATUS_CODES.FORBIDDEN)
@@ -99,6 +98,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 		return res
 			.status(STATUS_CODES.SERVER_ERROR)
 			.json({ msg: "server error has occurred" });
+	const body = data;
 	const uint8Salt = Uint8Array.from(
 		Array.from(process.env.PASS_SALT).map((letter) => letter.charCodeAt(0)),
 	);

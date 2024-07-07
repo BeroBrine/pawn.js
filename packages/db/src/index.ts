@@ -1,12 +1,26 @@
 import * as dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Client } from "pg";
+import fs from "node:fs";
 
 dotenv.config({ path: `${__dirname}/../.env` });
+const client = new Client({
+	user: process.env.USER ?? "",
+	password: process.env.PASSWORD ?? "",
+	host: process.env.HOST ?? "",
+	port: 23371,
+	database: process.env.DATABASE ?? "",
+	ssl: {
+		rejectUnauthorized: true,
+		ca: fs.readFileSync(`${__dirname}/../ca.pem`).toString(),
+	},
+});
 
-console.log(process.cwd());
-console.log(process.env.DATABASE_URL);
+async function main() {
+	await client.connect();
+	return;
+}
 
-const queryClient = postgres(process.env.DATABASE_URL ?? "");
+main();
 
-export const db = drizzle(queryClient);
+export const db = drizzle(client);

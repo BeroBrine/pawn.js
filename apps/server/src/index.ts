@@ -6,7 +6,7 @@ import cors from "cors";
 const app: express.Express = express();
 
 const port = 3000;
-
+console.log("starting");
 app.use(cookieParser());
 app.use(express.json());
 app.use(

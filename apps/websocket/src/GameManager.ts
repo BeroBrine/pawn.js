@@ -1,5 +1,8 @@
+import { db } from "@repo/db/db";
 import { Game } from "./Game";
 import type { User } from "./User";
+import { game } from "@repo/db/game";
+import { eq } from "drizzle-orm";
 
 export class GameManager {
 	private games: Game[];
@@ -15,17 +18,21 @@ export class GameManager {
 	addUser(user: User) {
 		this.users.push(user);
 		console.log(user.dbId);
-
 		this.addHandler(user);
 	}
 
-	removeUser(user: User) {
+	async removeUser(user: User) {
 		console.log("user ", user.id, " has left the game");
-		const game = this.games.find(
+		const abandonGame = this.games.find(
 			(elem) => elem.player1.id === user.id || elem.player2.id === user.id,
 		);
+		if (!abandonGame) return;
 		this.users = this.users.filter((elem) => elem !== user);
-		this.games = this.games.filter((elem) => elem !== game);
+		this.games = this.games.filter((elem) => elem !== abandonGame);
+		await db
+			.update(game)
+			.set({ gameStatus: "ABANDON" })
+			.where(eq(game.id, abandonGame?.id));
 	}
 
 	private addHandler(user: User) {
