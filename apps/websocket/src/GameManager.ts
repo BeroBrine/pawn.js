@@ -3,16 +3,30 @@ import { Game } from "./Game";
 import type { User } from "./User";
 import { game } from "@repo/db/game";
 import { eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 
 export class GameManager {
-	private games: Game[];
+	public static instance: GameManager;
+	public id: string;
+	public games: Game[];
 	private pendingUser: User | null;
-	private users: User[];
+	public users: User[];
 
 	constructor() {
 		this.games = [];
 		this.users = [];
+		this.id = randomUUID();
 		this.pendingUser = null;
+	}
+
+	static getInstance() {
+		if (GameManager.instance) {
+			console.log("hhhhhh");
+			return GameManager.instance;
+		}
+		console.log("returning new instance");
+		GameManager.instance = new GameManager();
+		return GameManager.instance;
 	}
 
 	addUser(user: User) {
@@ -34,7 +48,23 @@ export class GameManager {
 			.set({ gameStatus: "ABANDON" })
 			.where(eq(game.id, abandonGame?.id));
 	}
+	async finishGame(user: User, won: "b" | "w") {
+		console.log("finishing the game");
+		const finishGame = this.games.find(
+			(elem) => elem.player1.id === user.id || elem.player2.id === user.id,
+		);
 
+		if (!finishGame) {
+			console.log("no game found");
+			return;
+		}
+		this.games = this.games.filter((elem) => elem !== finishGame);
+		console.log("db update on ", finishGame.id);
+		await db
+			.update(game)
+			.set({ gameStatus: "COMPLETED", result: won })
+			.where(eq(game.id, finishGame?.id));
+	}
 	private addHandler(user: User) {
 		user.socket.on("init_game", (data) => {
 			const message = data;
@@ -46,12 +76,15 @@ export class GameManager {
 				this.pendingUser = user;
 			} else {
 				console.log("preparing new game with ", user.id, this.pendingUser.id);
+				if (this.pendingUser.dbId === user.dbId) {
+					console.log("trying to play with yourself?");
+					this.pendingUser = null;
+					return;
+				}
 				const game = new Game(this.pendingUser, user);
 				this.pendingUser.color = "white";
 				user.color = "black";
 				this.games.push(game);
-				// this.pendingUser.addGameToDb(game, user);
-				// user.addGameToDb(game, this.pendingUser);
 				this.pendingUser = null;
 			}
 		});
@@ -81,3 +114,4 @@ export class GameManager {
 		});
 	}
 }
+export const gameManager = GameManager.instance;

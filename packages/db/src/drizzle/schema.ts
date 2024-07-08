@@ -6,13 +6,13 @@ import {
 	timestamp,
 	unique,
 	varchar,
-	serial,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { index } from "drizzle-orm/pg-core";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const stat = pgEnum("stat", [
 	"GOING_ON",
@@ -103,8 +103,8 @@ export type SquareDb = z.infer<typeof SquareSchema>;
 const PieceSchema = z.enum(PieceSymbol.enumValues);
 export type PieceSymbolDb = z.infer<typeof PieceSchema>;
 
-export const color = pgEnum("color", ["white", "black"]);
-export const result = pgEnum("result", ["white", "black", "in_progress"]);
+export const color = pgEnum("color", ["w", "b"]);
+export const result = pgEnum("result", ["w", "b", "in_progress"]);
 
 export const game = pgTable(
 	"game",
@@ -118,7 +118,7 @@ export const game = pgTable(
 			.references(() => users.id),
 
 		gameStatus: stat("gameStatus").notNull(),
-		moves: text("moves")
+		moves: uuid("moves")
 			.references((): AnyPgColumn => move.id)
 			.array(),
 		startingFen: text("startingFen").default(
@@ -170,9 +170,9 @@ export const users = pgTable(
 	},
 );
 
-export const move = pgTable("moveHistory", {
-	id: serial("id").primaryKey(),
-	gameId: uuid("parentMoveTable").references(() => game.id),
+export const move = pgTable("move", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	gameId: uuid("gameId").references(() => game.id),
 	color: color("color"),
 	from: Square("from"),
 	to: Square("to"),
@@ -180,13 +180,50 @@ export const move = pgTable("moveHistory", {
 	captured: PieceSymbol("captured"),
 	promotion: PieceSymbol("promotion"),
 	flags: text("flags"),
-	san: text("flags"),
-	lan: text("string"),
-	before: text("string"),
-	after: text("string"),
+	san: text("san"),
+	lan: text("lan"),
+	before: text("before"),
+	after: text("after"),
 });
 
-export const dbUserZodSchema = createInsertSchema(users);
+export const dbUserZodSchema = createInsertSchema(users).pick({
+	username: true,
+	name: true,
+	password: true,
+	email: true,
+});
+
+export const userRelationToGame = relations(users, ({ many }) => ({
+	allGamesAsBlack: many(game, { relationName: "allGamesAsBlack" }),
+	allGamesAsWhite: many(game, { relationName: "allGamesAsWhite" }),
+}));
+
+export const gameRelationToUser = relations(game, ({ one }) => ({
+	player1: one(users, {
+		fields: [game.player1id],
+		references: [users.id],
+		relationName: "allGamesAsWhite",
+	}),
+
+	player2: one(users, {
+		fields: [game.player2id],
+		references: [users.id],
+		relationName: "allGamesAsBlack",
+	}),
+}));
+
+export const gameRelationToMove = relations(game, ({ many }) => ({
+	allMoves: many(move, { relationName: "allMoves" }),
+}));
+
+export const moveRelationToGame = relations(move, ({ one }) => ({
+	game: one(game, {
+		fields: [move.gameId],
+		references: [game.id],
+		relationName: "allMoves",
+	}),
+}));
+
 export type dbUserZod = z.infer<typeof dbUserZodSchema>;
 export const dbUserSelectZodSchema = createSelectSchema(users);
 

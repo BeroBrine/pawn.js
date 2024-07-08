@@ -70,8 +70,9 @@ const Game = () => {
 			setRender(false);
 		});
 
-		socket?.on("game_over", () => {
-			console.log("game over");
+		socket?.on("game_over", (data) => {
+			alert(`game over ${data.payload.winner} is the winner`);
+			setRender(false);
 		});
 	}, [socket, chess]);
 

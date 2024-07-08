@@ -104,14 +104,18 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 	);
 	const genHash = await generateHash(body.password, uint8Salt);
 	try {
-		const user = await db.insert(users).values({
-			email: body.email,
-			username: body.username,
-			password: genHash,
-			gamesAsBlack: new Array<string>(),
-			gamesAsWhite: new Array<string>(),
-		});
-		console.log(user);
+		const user = await db
+			.insert(users)
+			.values({
+				email: body.email,
+				username: body.username,
+				name: body.name,
+				password: genHash,
+				gamesAsBlack: new Array<string>(),
+				gamesAsWhite: new Array<string>(),
+			})
+			.returning({ userId: users.id });
+		console.log(user[0]);
 	} catch (e) {
 		return res
 			.status(STATUS_CODES.SERVER_ERROR)

@@ -39,6 +39,7 @@ const useAxios = async ({
 			try {
 				console.log("posting");
 				const response = await axios.post(`${url}`, data, axiosHeaders);
+				console.log("huh");
 				loading = false;
 				console.log(response);
 				const returnObj = { loading, response };

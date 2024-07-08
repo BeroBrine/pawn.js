@@ -1,6 +1,5 @@
 import type { Socket as socket } from "socket.io";
 import type { Socket as clSocket } from "socket.io-client";
-import type { Move } from "chess.js";
 import type { dbUserZod } from "@repo/db/game";
 
 export interface IReceivedEvents {
@@ -14,6 +13,7 @@ export interface IReceivedEvents {
 			userid: string;
 		};
 	}) => void;
+	finishGame: () => void;
 	move: (data: {
 		type: Messages.MOVE;
 		payload: {
@@ -46,12 +46,12 @@ export interface ISentEvents {
 				from: string;
 				to: string;
 			};
-			moveHistory: Move[];
 
 			turn: "white" | "black";
 		};
 	}) => void;
 	playerDisconnect: () => void;
+	finishGame: () => void;
 	game_over: (data: {
 		type: Messages.GAME_OVER;
 		payload: {

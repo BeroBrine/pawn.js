@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Client } from "pg";
+import * as schema from "./drizzle/schema";
 import fs from "node:fs";
 
 dotenv.config({ path: `${__dirname}/../.env` });
@@ -23,4 +24,4 @@ async function main() {
 
 main();
 
-export const db = drizzle(client);
+export const db = drizzle(client, { schema });

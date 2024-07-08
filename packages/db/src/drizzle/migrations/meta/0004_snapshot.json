@@ -1,6 +1,6 @@
 {
-  "id": "0fc2719a-2cc3-49b2-8c8b-eefe36f45c51",
-  "prevId": "4e4c20df-1c50-4937-bb87-af0084f7ba25",
+  "id": "47650159-3615-4076-82b3-0c17d6810d29",
+  "prevId": "86d03577-9c27-41a5-99d3-9b47ab6e4059",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -196,8 +196,26 @@
           "primaryKey": false,
           "notNull": false
         },
-        "string": {
-          "name": "string",
+        "san": {
+          "name": "san",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lan": {
+          "name": "lan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "before": {
+          "name": "before",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after": {
+          "name": "after",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -392,16 +410,16 @@
       "name": "color",
       "schema": "public",
       "values": [
-        "white",
-        "black"
+        "w",
+        "b"
       ]
     },
     "public.result": {
       "name": "result",
       "schema": "public",
       "values": [
-        "white",
-        "black",
+        "w",
+        "b",
         "in_progress"
       ]
     },

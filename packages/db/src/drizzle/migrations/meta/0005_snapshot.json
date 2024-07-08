@@ -1,6 +1,6 @@
 {
-  "id": "0fc2719a-2cc3-49b2-8c8b-eefe36f45c51",
-  "prevId": "4e4c20df-1c50-4937-bb87-af0084f7ba25",
+  "id": "2ff934e8-b36d-4ac3-82c6-c3710d1398e6",
+  "prevId": "47650159-3615-4076-82b3-0c17d6810d29",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -142,8 +142,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "parentMoveTable": {
-          "name": "parentMoveTable",
+        "gameId": {
+          "name": "gameId",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -196,8 +196,26 @@
           "primaryKey": false,
           "notNull": false
         },
-        "string": {
-          "name": "string",
+        "san": {
+          "name": "san",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lan": {
+          "name": "lan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "before": {
+          "name": "before",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after": {
+          "name": "after",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -205,12 +223,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "move_parentMoveTable_game_id_fk": {
-          "name": "move_parentMoveTable_game_id_fk",
+        "move_gameId_game_id_fk": {
+          "name": "move_gameId_game_id_fk",
           "tableFrom": "move",
           "tableTo": "game",
           "columnsFrom": [
-            "parentMoveTable"
+            "gameId"
           ],
           "columnsTo": [
             "id"
@@ -392,16 +410,16 @@
       "name": "color",
       "schema": "public",
       "values": [
-        "white",
-        "black"
+        "w",
+        "b"
       ]
     },
     "public.result": {
       "name": "result",
       "schema": "public",
       "values": [
-        "white",
-        "black",
+        "w",
+        "b",
         "in_progress"
       ]
     },

@@ -1,5 +1,5 @@
 {
-  "id": "8923ca86-8a6c-4c03-bdba-4c7baa36b09b",
+  "id": "4e4c20df-1c50-4937-bb87-af0084f7ba25",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -32,6 +32,12 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "moves": {
+          "name": "moves",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": false
         },
         "startingFen": {
           "name": "startingFen",
@@ -131,44 +137,79 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
+          "type": "uuid",
+          "primaryKey": true,
           "notNull": true
         },
-        "gameId": {
-          "name": "gameId",
+        "parentMoveTable": {
+          "name": "parentMoveTable",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "color": {
+          "name": "color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
         },
         "from": {
           "name": "from",
-          "type": "varchar(3)",
+          "type": "Square",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
         "to": {
           "name": "to",
-          "type": "varchar(3)",
+          "type": "Square",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "playerColor": {
-          "name": "playerColor",
-          "type": "color",
+        "piece": {
+          "name": "piece",
+          "type": "PieceSymbol",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "captured": {
+          "name": "captured",
+          "type": "PieceSymbol",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "promotion": {
+          "name": "promotion",
+          "type": "PieceSymbol",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "flags": {
+          "name": "flags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "string": {
+          "name": "string",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "move_gameId_game_id_fk": {
-          "name": "move_gameId_game_id_fk",
+        "move_parentMoveTable_game_id_fk": {
+          "name": "move_parentMoveTable_game_id_fk",
           "tableFrom": "move",
           "tableTo": "game",
           "columnsFrom": [
-            "gameId"
+            "parentMoveTable"
           ],
           "columnsTo": [
             "id"
@@ -178,15 +219,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "id": {
-          "name": "id",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.users": {
       "name": "users",
@@ -272,6 +305,88 @@
     }
   },
   "enums": {
+    "public.PieceSymbol": {
+      "name": "PieceSymbol",
+      "schema": "public",
+      "values": [
+        "p",
+        "n",
+        "b",
+        "r",
+        "q",
+        "k"
+      ]
+    },
+    "public.Square": {
+      "name": "Square",
+      "schema": "public",
+      "values": [
+        "a8",
+        "b8",
+        "c8",
+        "d8",
+        "e8",
+        "f8",
+        "g8",
+        "h8",
+        "a7",
+        "b7",
+        "c7",
+        "d7",
+        "e7",
+        "f7",
+        "g7",
+        "h7",
+        "a6",
+        "b6",
+        "c6",
+        "d6",
+        "e6",
+        "f6",
+        "g6",
+        "h6",
+        "a5",
+        "b5",
+        "c5",
+        "d5",
+        "e5",
+        "f5",
+        "g5",
+        "h5",
+        "a4",
+        "b4",
+        "c4",
+        "d4",
+        "e4",
+        "f4",
+        "g4",
+        "h4",
+        "a3",
+        "b3",
+        "c3",
+        "d3",
+        "e3",
+        "f3",
+        "g3",
+        "h3",
+        "a2",
+        "b2",
+        "c2",
+        "d2",
+        "e2",
+        "f2",
+        "g2",
+        "h2",
+        "a1",
+        "b1",
+        "c1",
+        "d1",
+        "e1",
+        "f1",
+        "g1",
+        "h1"
+      ]
+    },
     "public.color": {
       "name": "color",
       "schema": "public",

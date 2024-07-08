@@ -14,6 +14,7 @@ const io = new Server<IReceivedEvents, ISentEvents>(port, {
 		origin: ["http://localhost:7173"],
 	},
 });
+
 const gameManager = new GameManager();
 
 io.on("connection", (socket) => {

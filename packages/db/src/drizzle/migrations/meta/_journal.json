@@ -5,29 +5,43 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1720372563903,
-      "tag": "0000_aromatic_cassandra_nova",
+      "when": 1720422726212,
+      "tag": "0000_hot_proudstar",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1720376525732,
-      "tag": "0001_red_gravity",
+      "when": 1720422921523,
+      "tag": "0001_oval_microbe",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1720377179601,
-      "tag": "0002_narrow_warbird",
+      "when": 1720424481138,
+      "tag": "0002_daily_nightshade",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1720378148513,
-      "tag": "0003_perpetual_morph",
+      "when": 1720424609127,
+      "tag": "0003_elite_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1720424715155,
+      "tag": "0004_chemical_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1720435240010,
+      "tag": "0005_unique_misty_knight",
       "breakpoints": true
     }
   ]

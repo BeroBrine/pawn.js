@@ -1,0 +1,1 @@
+ALTER TABLE "move" ADD COLUMN "san" text;

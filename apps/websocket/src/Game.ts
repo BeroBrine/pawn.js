@@ -4,15 +4,22 @@ import { Messages } from "@repo/interfaceAndEnums/Messages";
 import type { User } from "./User";
 import { randomUUID } from "node:crypto";
 import { db } from "@repo/db/db";
-import { game, move, users } from "@repo/db/game";
+import {
+	game,
+	move,
+	type PieceSymbolDb,
+	type SquareDb,
+	users,
+} from "@repo/db/game";
 import { eq, or } from "drizzle-orm";
+import { gameManager } from "./GameManager";
 
 export class Game {
 	public player1: User;
 	public player2: User;
 	public id: string;
 	private board: Chess;
-	private moveHistory: Move[];
+	private movesId: string[];
 
 	constructor(player1: User, player2: User) {
 		console.log("init the game");
@@ -20,8 +27,7 @@ export class Game {
 		this.player1 = player1;
 		this.player2 = player2;
 		this.board = new Chess();
-		this.moveHistory = [];
-
+		this.movesId = [];
 		this.player1.socket.emit("init_game", {
 			type: Messages.INIT_GAME,
 			payload: {
@@ -48,14 +54,13 @@ export class Game {
 		try {
 			console.log(this.board.turn());
 			const latestMove = this.board.move(move);
-			console.log(latestMove);
-			this.moveHistory.push(latestMove);
+			this.updateMovesAndGame(latestMove);
 		} catch (e) {
 			console.error(e);
 			return;
 		}
-
 		if (this.board.isGameOver()) {
+			console.log(this.board.isGameOver());
 			this.player1.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
@@ -69,6 +74,19 @@ export class Game {
 					winner: this.board.turn() === Colors.WHITE ? "black" : "white",
 				},
 			});
+			console.log("gameManger id in game is ", gameManager.id);
+			console.log(
+				"++++++++++++++++++++++++++GAMES+++++++++++++++++++++++++++++++===",
+			);
+			console.log(gameManager.games);
+			console.log(
+				"++++++++++++++++++++++++++USERS+++++++++++++++++++++++++++++++===",
+			);
+			console.log(gameManager.games);
+			gameManager.finishGame(
+				this.player1,
+				this.board.turn() === Colors.WHITE ? "b" : "w",
+			);
 		}
 		if (this.board.turn() === "w") {
 			console.log("send to 1");
@@ -76,7 +94,6 @@ export class Game {
 				type: Messages.MOVE,
 				payload: {
 					move,
-					moveHistory: this.moveHistory,
 					turn: this.board.turn() === "w" ? "white" : "black",
 				},
 			});
@@ -86,7 +103,6 @@ export class Game {
 				type: Messages.MOVE,
 				payload: {
 					move,
-					moveHistory: this.moveHistory,
 					turn: this.board.turn() === "w" ? "white" : "black",
 				},
 			});
@@ -127,22 +143,32 @@ export class Game {
 				gamesAsBlack: blackUserArr,
 			})
 			.where(eq(users.id, userQuery[1].id));
-
-		await db.insert(move).values({
-			gameId: this.id,
-		});
 	}
 
-	private async updateMovesAndGame(
-		from: Square,
-		to: Square,
-		color: "white" | "black",
-		data: string[],
-	) {
-		await db.transaction(async (tx) => {
-			await tx.update(move).set({
-				data,
-			});
-		});
+	private async updateMovesAndGame(latestMove: Move) {
+		const id = await db
+			.insert(move)
+			.values({
+				color: latestMove.color as "w" | "b",
+				gameId: this.id,
+				from: latestMove.from as SquareDb,
+				to: latestMove.to as SquareDb,
+				piece: latestMove.piece as PieceSymbolDb,
+				captured: latestMove.captured as PieceSymbolDb,
+				promotion: latestMove.promotion as PieceSymbolDb,
+				flags: latestMove.flags as string,
+				san: latestMove.san as string,
+				lan: latestMove.lan as string,
+				before: latestMove.before as string,
+				after: latestMove.after as string,
+			})
+			.returning({ mvId: move.id });
+		this.movesId.push(id[0].mvId);
+		await db
+			.update(game)
+			.set({
+				moves: this.movesId,
+			})
+			.where(eq(game.id, this.id));
 	}
 }

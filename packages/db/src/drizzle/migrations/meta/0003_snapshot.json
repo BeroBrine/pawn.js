@@ -1,6 +1,6 @@
 {
-  "id": "d0a62c20-d0ab-48a7-b3d5-050aaf0a32da",
-  "prevId": "3487bea6-9e3a-488d-81ec-47b9ea673fc4",
+  "id": "86d03577-9c27-41a5-99d3-9b47ab6e4059",
+  "prevId": "2c9e0918-c8fe-4da5-a4a5-2bfd506f2b20",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -35,7 +35,7 @@
         },
         "moves": {
           "name": "moves",
-          "type": "text[]",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -131,15 +131,16 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.moveHistory": {
-      "name": "moveHistory",
+    "public.move": {
+      "name": "move",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "parentMoveTable": {
           "name": "parentMoveTable",
@@ -195,8 +196,26 @@
           "primaryKey": false,
           "notNull": false
         },
-        "string": {
-          "name": "string",
+        "san": {
+          "name": "san",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lan": {
+          "name": "lan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "before": {
+          "name": "before",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after": {
+          "name": "after",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -204,9 +223,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "moveHistory_parentMoveTable_game_id_fk": {
-          "name": "moveHistory_parentMoveTable_game_id_fk",
-          "tableFrom": "moveHistory",
+        "move_parentMoveTable_game_id_fk": {
+          "name": "move_parentMoveTable_game_id_fk",
+          "tableFrom": "move",
           "tableTo": "game",
           "columnsFrom": [
             "parentMoveTable"

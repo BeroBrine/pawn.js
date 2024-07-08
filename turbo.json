@@ -15,6 +15,9 @@
 			"cache": false,
 			"persistent": true
 		},
+		"studio": {
+			"cache": false
+		},
 		"db:generate": {
 			"cache": false
 		},

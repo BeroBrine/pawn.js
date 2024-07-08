@@ -1,6 +1,6 @@
 {
-  "id": "3487bea6-9e3a-488d-81ec-47b9ea673fc4",
-  "prevId": "5fb6d656-e1b3-4890-bcf3-41c2a318be99",
+  "id": "2c9e0918-c8fe-4da5-a4a5-2bfd506f2b20",
+  "prevId": "0fc2719a-2cc3-49b2-8c8b-eefe36f45c51",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -35,7 +35,7 @@
         },
         "moves": {
           "name": "moves",
-          "type": "text[]",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -142,69 +142,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "gameId": {
-          "name": "gameId",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "moves": {
-          "name": "moves",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "move_gameId_game_id_fk": {
-          "name": "move_gameId_game_id_fk",
-          "tableFrom": "move",
-          "tableTo": "game",
-          "columnsFrom": [
-            "gameId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "move_moves_moveHistory_id_fk": {
-          "name": "move_moves_moveHistory_id_fk",
-          "tableFrom": "move",
-          "tableTo": "moveHistory",
-          "columnsFrom": [
-            "moves"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "id": {
-          "name": "id",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        }
-      }
-    },
-    "public.moveHistory": {
-      "name": "moveHistory",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "parentMoveTable": {
           "name": "parentMoveTable",
           "type": "uuid",
@@ -259,6 +196,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "san": {
+          "name": "san",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "string": {
           "name": "string",
           "type": "text",
@@ -268,10 +211,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "moveHistory_parentMoveTable_move_id_fk": {
-          "name": "moveHistory_parentMoveTable_move_id_fk",
-          "tableFrom": "moveHistory",
-          "tableTo": "move",
+        "move_parentMoveTable_game_id_fk": {
+          "name": "move_parentMoveTable_game_id_fk",
+          "tableFrom": "move",
+          "tableTo": "game",
           "columnsFrom": [
             "parentMoveTable"
           ],
