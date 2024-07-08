@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { GameManager } from "./GameManager";
+import { gameManager } from "./GameManager";
 
 import {
 	Messages,
@@ -14,8 +14,6 @@ const io = new Server<IReceivedEvents, ISentEvents>(port, {
 		origin: ["http://localhost:7173"],
 	},
 });
-
-const gameManager = new GameManager();
 
 io.on("connection", (socket) => {
 	socket.on("userid", (data) => {

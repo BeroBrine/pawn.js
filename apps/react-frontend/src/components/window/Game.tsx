@@ -68,11 +68,13 @@ const Game = () => {
 		socket?.on("playerDisconnect", () => {
 			alert("opponent has left the game");
 			setRender(false);
+			setChess(new Chess());
 		});
 
 		socket?.on("game_over", (data) => {
 			alert(`game over ${data.payload.winner} is the winner`);
 			setRender(false);
+			setChess(new Chess());
 		});
 	}, [socket, chess]);
 

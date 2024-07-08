@@ -4,6 +4,7 @@ import type { dbUserZod } from "@repo/db/game";
 
 export interface IReceivedEvents {
 	basicEmit: (emit: string, callback: (e: number) => void) => void;
+	game_over: () => void;
 	init_game: (data: {
 		type: Messages.INIT_GAME;
 	}) => void;

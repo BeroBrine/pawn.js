@@ -60,31 +60,23 @@ export class Game {
 			return;
 		}
 		if (this.board.isGameOver()) {
-			console.log(this.board.isGameOver());
+			const winner = this.board.turn() === Colors.WHITE ? "black" : "white";
 			this.player1.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
-					winner: this.board.turn() === Colors.WHITE ? "black" : "white",
+					winner,
 				},
 			});
 
 			this.player2.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
-					winner: this.board.turn() === Colors.WHITE ? "black" : "white",
+					winner,
 				},
 			});
-			console.log("gameManger id in game is ", gameManager.id);
-			console.log(
-				"++++++++++++++++++++++++++GAMES+++++++++++++++++++++++++++++++===",
-			);
-			console.log(gameManager.games);
-			console.log(
-				"++++++++++++++++++++++++++USERS+++++++++++++++++++++++++++++++===",
-			);
-			console.log(gameManager.games);
 			gameManager.finishGame(
 				this.player1,
+				this.player2,
 				this.board.turn() === Colors.WHITE ? "b" : "w",
 			);
 		}
