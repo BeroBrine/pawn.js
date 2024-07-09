@@ -10,14 +10,18 @@ import type {
 } from "react-chessboard/dist/chessboard/types";
 import useAxios from "../../hooks/useAxios";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-const Game = () => {
+const CustomGame = () => {
 	const chess = useMemo(() => new Chess(), []);
 	const [pos, setPos] = useState(chess.fen());
 	const [render, setRender] = useState<boolean>(false);
 	const [orientation, setOrientation] = useState<BoardOrientation | undefined>(
 		undefined,
 	);
+	const param = useParams();
+	console.log(param);
+	const { dbId } = useParams();
 	const token = localStorage.getItem("token");
 	if (!token) {
 		console.log("token not found");
@@ -26,27 +30,32 @@ const Game = () => {
 	const { socket, loading } = useSocket();
 	const navigate = useNavigate();
 	// TODO: Rememeber to uncomment this.
-	// useEffect(() => {
-	// 	(async () => {
-	// 		try {
-	// 			const axiosData = await useAxios({
-	// 				url: "http://localhost:3000/auth/loggedIn",
-	// 				method: "POST",
-	// 				axiosHeaders: {
-	// 					headers: {
-	// 						withAuthorization: true,
-	// 						Authorization: `token ${token}`,
-	// 					},
-	// 				},
-	// 			});
-	// 		} catch (e) {
-	// 			alert("please login");
-	// 			navigate("/login");
-	// 		}
-	// 	})();
-	// }, [navigate, token]);
+	useEffect(() => {
+		(async () => {
+			try {
+				const axiosData = await useAxios({
+					url: "http://localhost:3000/auth/loggedIn",
+					method: "POST",
+					axiosHeaders: {
+						headers: {
+							withAuthorization: true,
+							Authorization: `token ${token}`,
+						},
+					},
+				});
+			} catch (e) {
+				alert("please login");
+				navigate("/login");
+			}
+		})();
+	}, [navigate, token]);
 
 	useEffect(() => {
+		if (!dbId) {
+			console.log("no db id");
+			return;
+		}
+		socket?.emit("custom_game", dbId);
 		socket?.on("init_game", (data) => {
 			console.log("inside init game");
 			if (data.payload.color === "b") setOrientation("black");
@@ -76,7 +85,7 @@ const Game = () => {
 			setRender(false);
 			navigate("/");
 		});
-	}, [socket, chess, navigate]);
+	}, [socket, chess, navigate, dbId]);
 
 	const onDrop = (from: Square, to: Square) => {
 		socket?.emit("move", {
@@ -104,7 +113,8 @@ const Game = () => {
 		);
 	if (!socket) return;
 	return (
-		<div className="h-screen p-8">
+		<div className="h-screen p-8 flex justify-center items-center">
+			{!render ? <div className="text-8xl text-white">WAITING.....</div> : null}
 			{render ? (
 				<div className="w-[400px] ">
 					<Chessboard
@@ -114,29 +124,8 @@ const Game = () => {
 					/>
 				</div>
 			) : null}
-			<div className="flex flex-col items-center justify-center">
-				<Button
-					handleClick={() => {
-						socket?.emit("init_game", {
-							type: Messages.INIT_GAME,
-						});
-					}}
-				>
-					Join
-				</Button>
-
-				<button
-					type="button"
-					onClick={() => {
-						navigate("/");
-					}}
-					className="bg-black text-white rounded-lg m-2 p-3"
-				>
-					Go Home
-				</button>
-			</div>
 		</div>
 	);
 };
 
-export default Game;
+export default CustomGame;

@@ -3,6 +3,7 @@ import authRouter from "./routes/auth";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { db } from "@repo/db/db";
+import gameRouter from "./routes/game";
 
 const app: express.Express = express();
 interface Iparam {
@@ -21,6 +22,8 @@ app.use(
 );
 
 app.use("/auth", authRouter);
+app.use("/game", gameRouter);
+
 app.get("/db", async (req, res) => {
 	try {
 		const query = await db.query.users.findMany({

@@ -8,11 +8,13 @@ import { socketManager } from "./SocketManager";
 export class GameManager {
 	private games: Game[];
 	private pendingGameid: string | null;
+	private flag: boolean;
 	private users: User[];
 
 	constructor() {
 		this.games = [];
 		this.users = [];
+		this.flag = false;
 		this.pendingGameid = null;
 	}
 
@@ -77,6 +79,25 @@ export class GameManager {
 				this.pendingGameid = game.id;
 				socketManager.addUser(game.id, user);
 				console.log("new game created ", game.id);
+			}
+		});
+
+		user.socket.on("custom_game", async (data) => {
+			if (!data) return;
+			console.log("data is ", data);
+			if (this.flag) {
+				console.log("p2 is here ");
+				const game = this.games.find((elem) => elem.id === data);
+				game?.initSecondPlayer(user);
+				socketManager.addUser(data, user);
+				this.flag = false;
+			} else {
+				console.log("data is ", data);
+				console.log("p1 is here ");
+				const custGame = new Game(user, data);
+				this.games.push(custGame);
+				socketManager.addUser(data, user);
+				this.flag = true;
 			}
 		});
 

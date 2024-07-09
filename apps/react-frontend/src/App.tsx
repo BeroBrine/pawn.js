@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { useCustomRoute } from "./hooks/useCustomRoute";
 
 function App() {

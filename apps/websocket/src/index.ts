@@ -18,8 +18,8 @@ const gameManager = new GameManager();
 
 io.on("connection", (socket) => {
 	const token = socket.handshake.headers.authorization;
-	if (!token) return;
 	const userId = getUserId(token as string);
+	if (!userId) return;
 	gameManager.addUser(new User(socket, userId));
 });
 

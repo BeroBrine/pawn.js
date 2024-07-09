@@ -4,8 +4,16 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: `${process.cwd()}/.env` });
 
 const getUserId = (token: string) => {
-	const verifiedObj = verify(token, process.env.JWT_SECRET ?? "") as IJwtToken;
-	return verifiedObj.userId;
+	try {
+		const verifiedObj = verify(
+			token,
+			process.env.JWT_SECRET ?? "",
+		) as IJwtToken;
+		return verifiedObj.userId;
+	} catch (e) {
+		console.log(e);
+		return;
+	}
 };
 
 export default getUserId;

@@ -19,6 +19,7 @@ export const stat = pgEnum("stat", [
 	"COMPLETED",
 	"ABANDON",
 	"PLAYER_LEFT",
+	"CUSTOM_GAME",
 ]);
 
 export const Square = pgEnum("Square", [
@@ -110,21 +111,17 @@ export const game = pgTable(
 	"game",
 	{
 		id: uuid("id").primaryKey().notNull(),
-		player1id: uuid("player1id")
-			.notNull()
-			.references(() => users.id),
-		player2id: uuid("player2id")
-			.notNull()
-			.references(() => users.id),
+		player1id: uuid("player1id").references(() => users.id),
+		player2id: uuid("player2id").references(() => users.id),
 
-		gameStatus: stat("gameStatus").notNull(),
+		gameStatus: stat("gameStatus"),
 		moves: uuid("moves")
 			.references((): AnyPgColumn => move.id)
 			.array(),
 		startingFen: text("startingFen").default(
 			"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 		),
-		currentFen: text("currentFen").notNull(),
+		currentFen: text("currentFen"),
 		startAt: timestamp("startAt", {
 			withTimezone: true,
 			mode: "string",

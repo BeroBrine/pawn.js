@@ -24,6 +24,7 @@ export interface IReceivedEvents {
 			};
 		};
 	}) => void;
+	custom_game: (data: string) => void;
 }
 
 export interface ISentEvents {

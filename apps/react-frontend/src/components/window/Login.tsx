@@ -61,7 +61,7 @@ const Login = () => {
 			if (obj?.response.status === STATUS_CODES.OK && obj.response.data.token) {
 				localStorage.removeItem("token");
 				localStorage.setItem("token", obj.response.data.token);
-				navigate("/game");
+				navigate("/");
 			} else {
 				alert("invalid username or password");
 			}

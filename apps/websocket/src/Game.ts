@@ -21,16 +21,18 @@ export class Game {
 	public player2: User | null;
 	public id: string;
 	private board: Chess;
+	public customGame?: boolean;
 	public status: Status | null;
 	private movesId: string[];
 
-	constructor(player1: User, player2?: User, gameId?: string) {
+	constructor(player1: User, gameId?: string, customGame?: boolean) {
 		this.id = gameId ?? randomUUID();
 		this.player1 = player1;
-		this.player2 = player2 ?? null;
+		this.player2 = null;
 		this.board = new Chess();
 		this.board.reset();
 		this.status = null;
+		this.customGame = customGame;
 		this.movesId = [];
 	}
 
@@ -54,11 +56,15 @@ export class Game {
 			console.log(e);
 			return;
 		}
-		try {
-			this.createGameInDb();
-		} catch (e) {
-			console.log(e);
-			return;
+		if (this.customGame) {
+			try {
+				this.createGameInDb();
+			} catch (e) {
+				console.log(e);
+				return;
+			}
+		} else {
+			this.customGameUpdate();
 		}
 
 		this.player2.socket.on("disconnect", () => {
@@ -182,5 +188,32 @@ export class Game {
 				moves: this.movesId,
 			})
 			.where(eq(game.id, this.id));
+	}
+
+	async customGameUpdate() {
+		if (!this.player2) return;
+		const userQuery = await db
+			.select()
+			.from(users)
+			.where(
+				or(eq(users.id, this.player1.dbId), eq(users.id, this.player2.dbId)),
+			);
+		const whiteUserArr = userQuery[0].gamesAsWhite;
+		const blackUserArr = userQuery[1].gamesAsBlack;
+		whiteUserArr.push(this.id);
+		blackUserArr.push(this.id);
+		await db
+			.update(users)
+			.set({
+				gamesAsWhite: whiteUserArr,
+			})
+			.where(eq(users.id, userQuery[0].id));
+
+		await db
+			.update(users)
+			.set({
+				gamesAsBlack: blackUserArr,
+			})
+			.where(eq(users.id, userQuery[1].id));
 	}
 }
