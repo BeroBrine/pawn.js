@@ -18,6 +18,7 @@
 		"./Colors": "./src/index.ts",
 		"./TMessage": "./src/index.ts",
 		"./STATUS_CODES": "./src/index.ts",
-		"./clientSocket": "./src/index.ts"
+		"./clientSocket": "./src/index.ts",
+		"./IJwtToken": "./src/index.ts"
 	}
 }

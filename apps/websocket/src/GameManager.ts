@@ -1,62 +1,45 @@
 import { db } from "@repo/db/db";
 import { Game } from "./Game";
 import type { User } from "./User";
-import { game, users } from "@repo/db/game";
+import { game } from "@repo/db/game";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
+import { socketManager } from "./SocketManager";
 
 export class GameManager {
-	private static instance: GameManager;
-	public id: string;
-	public games: Game[];
-	private pendingUser: User | null;
-	public users: User[];
+	private games: Game[];
+	private pendingGameid: string | null;
+	private users: User[];
 
-	private constructor() {
+	constructor() {
 		this.games = [];
 		this.users = [];
-		this.id = randomUUID();
-		this.pendingUser = null;
-	}
-
-	static getInstance() {
-		if (GameManager.instance) return GameManager.instance;
-		GameManager.instance = new GameManager();
-		return GameManager.instance;
+		this.pendingGameid = null;
 	}
 
 	addUser(user: User) {
 		this.users.push(user);
-		console.log(user.dbId);
 		this.addHandler(user);
 	}
-
 	async removeUser(user: User) {
-		console.log("user ", user.dbId, " has left the game");
 		const abandonGame = this.games.find(
 			(elem) =>
-				elem.player1.dbId === user.dbId || elem.player2.dbId === user.dbId,
+				elem.player1.dbId === user.dbId || elem.player2?.dbId === user.dbId,
 		);
 		this.users = this.users.filter((elem) => elem !== user);
 		if (!abandonGame) {
 			return;
 		}
 		this.games = this.games.filter((elem) => elem !== abandonGame);
-		console.log(this.pendingUser);
+		socketManager.removeUser(abandonGame.id, user);
 		await db
 			.update(game)
 			.set({ gameStatus: "ABANDON" })
 			.where(eq(game.id, abandonGame?.id));
 	}
-	async finishGame(user1: User, user2: User, won: "b" | "w") {
+
+	async finishGame(gameId: string, won: "w" | "b") {
 		console.log("finishing the game");
-		const finishGame = this.games.find(
-			(elem) =>
-				elem.player1.dbId === user1.dbId ||
-				elem.player2.dbId === user1.dbId ||
-				elem.player2.dbId === user2.dbId ||
-				elem.player2.dbId === user2.dbId,
-		);
+		const finishGame = this.games.find((elem) => gameId === elem.id);
 		if (!finishGame) {
 			console.log("no game found");
 			return;
@@ -68,37 +51,40 @@ export class GameManager {
 			.set({ gameStatus: "COMPLETED", result: won })
 			.where(eq(game.id, finishGame?.id));
 	}
+
 	private addHandler(user: User) {
 		user.socket.on("init_game", (data) => {
-			const message = data;
-			if (!message) throw new Error("invalid message");
-			console.log("in the init game");
-
-			console.log("in the init game");
-			if (!this.pendingUser) {
-				this.pendingUser = user;
-			} else {
-				console.log("preparing new game with ", user.id, this.pendingUser.id);
-				if (this.pendingUser.dbId === user.dbId) {
-					console.log("trying to play with yourself?");
-					this.pendingUser =
-						this.users.find((elem) => elem.dbId !== user.dbId) ?? null;
-					console.log(this.users);
+			if (this.pendingGameid) {
+				const game = this.games.find((game) => game.id === this.pendingGameid);
+				console.log(game?.id, game?.player1.dbId);
+				if (!game) {
+					console.log("couldn't find the game");
 					return;
 				}
-				const game = new Game(this.pendingUser, user);
-				this.pendingUser.color = "white";
-				user.color = "black";
+				if (game.player1.dbId === user.dbId) {
+					console.log("game.player1 ", game.player1.dbId);
+					console.log("user dbId ", user.dbId);
+					console.log("trying to play with yourself?");
+					return;
+				}
+				console.log("game id added ", game.id);
+				socketManager.addUser(game.id, user);
+				this.pendingGameid = null;
+				game.initSecondPlayer(user);
+			} else {
+				const game = new Game(user);
 				this.games.push(game);
-				this.pendingUser = null;
+				this.pendingGameid = game.id;
+				socketManager.addUser(game.id, user);
+				console.log("new game created ", game.id);
 			}
 		});
 
 		user.socket.on("move", (data) => {
-			console.log("move");
 			const message = data;
 			const game = this.games.find(
-				(game) => game.player1 === user || game.player2 === user,
+				(game) =>
+					game.player1.dbId === user.dbId || game.player2?.dbId === user.dbId,
 			);
 			if (!game) {
 				console.log("nogame");
@@ -107,7 +93,12 @@ export class GameManager {
 			if (!message.payload) {
 				throw new Error("No Payload");
 			}
-			game.makeMove(message.payload.move);
+			if (game) {
+				game.makeMove(message.payload.move);
+				if (game.status) {
+					this.finishGame(game.id, game.status);
+				}
+			}
 		});
 
 		user.socket.on("disconnect", () => {
@@ -118,5 +109,3 @@ export class GameManager {
 		});
 	}
 }
-
-export const gameManager = GameManager.getInstance();

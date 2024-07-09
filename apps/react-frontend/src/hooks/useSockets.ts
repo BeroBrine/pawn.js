@@ -2,15 +2,18 @@ import type { clientSocket } from "@repo/interfaceAndEnums/IReceivedEvents";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-const url = "ws://localhost:7777";
-
 export const useSocket = () => {
 	const [socket, setSocket] = useState<clientSocket | null>(null);
 	const [loading, setLoading] = useState(true);
+	const url = "ws://localhost:7777";
 	console.log(url);
 	if (!url) throw new Error("web sock url failed");
 	useEffect(() => {
-		const socket = io(url) as clientSocket;
+		const socket = io(url, {
+			extraHeaders: {
+				Authorization: localStorage.getItem("token") ?? "",
+			},
+		}) as clientSocket;
 		socket.on("connect", () => {
 			setSocket(socket);
 			setLoading(false);

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Chess } from "chess.js";
+import { useEffect, useMemo, useState } from "react";
+import { Chess, type PieceSymbol, type Color } from "chess.js";
 import Button from "../Button";
 import { useSocket } from "../../hooks/useSockets";
 import { Chessboard } from "react-chessboard";
@@ -12,21 +12,22 @@ import useAxios from "../../hooks/useAxios";
 import { useNavigate } from "react-router-dom";
 
 const Game = () => {
-	const [chess, setChess] = useState(new Chess());
-	const [board, setBoard] = useState(chess.board());
+	const chess = useMemo(() => new Chess(), []);
+	const [pos, setPos] = useState(chess.fen());
 	const [render, setRender] = useState<boolean>(false);
 	const [orientation, setOrientation] = useState<BoardOrientation | undefined>(
 		undefined,
 	);
+	const token = localStorage.getItem("token");
+	if (!token) {
+		console.log("token not found");
+		return;
+	}
 	const { socket, loading } = useSocket();
-	const [userId, setUserId] = useState("");
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		(async () => {
-			const token = localStorage.getItem("token");
-			console.log(token);
-
 			try {
 				const axiosData = await useAxios({
 					url: "http://localhost:3000/auth/loggedIn",
@@ -38,19 +39,20 @@ const Game = () => {
 						},
 					},
 				});
-				setUserId(axiosData?.response.data.userId);
 			} catch (e) {
 				alert("please login");
 				navigate("/login");
 			}
 		})();
-	}, [navigate]);
+	}, [navigate, token]);
 
 	useEffect(() => {
 		socket?.on("init_game", (data) => {
 			console.log("inside init game");
 			if (data.payload.color === "b") setOrientation("black");
 			else setOrientation("white");
+			chess.reset();
+			setPos(chess.fen());
 			setRender(true);
 		});
 
@@ -59,24 +61,22 @@ const Game = () => {
 			const { to, from } = data.payload.move;
 			const result = chess.move({ to: to, from: from });
 			console.log(result);
-
-			console.log("on move turn before setting the board is ", chess.turn());
-			setBoard(chess.board());
-			console.log("on move turn now is ", chess.turn());
+			setPos(chess.fen());
+			console.log("on move turn before setting the board is ", chess?.turn());
+			console.log("on move turn now is ", chess?.turn());
 		});
 
 		socket?.on("playerDisconnect", () => {
 			alert("opponent has left the game");
 			setRender(false);
-			setChess(new Chess());
 		});
 
 		socket?.on("game_over", (data) => {
 			alert(`game over ${data.payload.winner} is the winner`);
 			setRender(false);
-			setChess(new Chess());
+			navigate("/");
 		});
-	}, [socket, chess]);
+	}, [socket, chess, navigate]);
 
 	const onDrop = (from: Square, to: Square) => {
 		socket?.emit("move", {
@@ -89,10 +89,10 @@ const Game = () => {
 			},
 		});
 
-		chess.move({ from: from, to: to });
-		console.log("on drop turn before setting the board is ", chess.turn());
-		setBoard(chess.board());
-		console.log("on drop turn now is ", chess.turn());
+		chess?.move({ from: from, to: to });
+		setPos(chess.fen());
+		console.log("on drop turn before setting the board is ", chess?.turn());
+		console.log("on drop turn now is ", chess?.turn());
 		return true;
 	};
 
@@ -105,24 +105,18 @@ const Game = () => {
 	if (!socket) return;
 	return (
 		<div className="h-screen p-8">
-			{render && board ? (
+			{render ? (
 				<div className="w-[400px] ">
 					<Chessboard
-						position={chess.fen()}
+						position={pos}
 						boardOrientation={orientation}
 						onPieceDrop={onDrop}
 					/>
 				</div>
 			) : null}
-			<div className="flex items-center justify-center">
+			<div className="flex flex-col items-center justify-center">
 				<Button
 					handleClick={() => {
-						socket?.emit("userid", {
-							type: Messages.USER_DATA,
-							payload: {
-								userid: userId,
-							},
-						});
 						socket?.emit("init_game", {
 							type: Messages.INIT_GAME,
 						});
@@ -130,6 +124,16 @@ const Game = () => {
 				>
 					Join
 				</Button>
+
+				<button
+					type="button"
+					onClick={() => {
+						navigate("/");
+					}}
+					className="bg-black text-white rounded-lg m-2 p-3"
+				>
+					Go Home
+				</button>
 			</div>
 		</div>
 	);

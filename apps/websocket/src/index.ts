@@ -1,29 +1,26 @@
 import { Server } from "socket.io";
-import { gameManager } from "./GameManager";
 
-import {
-	Messages,
-	type IReceivedEvents,
-} from "@repo/interfaceAndEnums/IReceivedEvents";
+import type { IReceivedEvents } from "@repo/interfaceAndEnums/IReceivedEvents";
 import type { ISentEvents } from "@repo/interfaceAndEnums/ISentEvents";
 import { User } from "./User";
+import getUserId from "./utils/getUserId";
+import { GameManager } from "./GameManager";
 
 const port = 7777;
+
 const io = new Server<IReceivedEvents, ISentEvents>(port, {
 	cors: {
 		origin: ["http://localhost:7173"],
 	},
 });
 
-io.on("connection", (socket) => {
-	socket.on("userid", (data) => {
-		if (data.type !== Messages.USER_DATA) return;
-		gameManager.addUser(new User(socket, data.payload.userid));
-	});
-});
+const gameManager = new GameManager();
 
-io.on("error", () => {
-	console.log("disconnect");
+io.on("connection", (socket) => {
+	const token = socket.handshake.headers.authorization;
+	if (!token) return;
+	const userId = getUserId(token as string);
+	gameManager.addUser(new User(socket, userId));
 });
 
 console.log(`starting the server at port ${port}`);

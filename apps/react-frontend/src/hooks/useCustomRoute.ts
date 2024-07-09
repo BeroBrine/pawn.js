@@ -1,4 +1,5 @@
 import Game from "../components/window/Game";
+import LandingPage from "../components/window/LandingPage";
 import Login from "../components/window/Login";
 import SignUp from "../components/window/SignUp";
 
@@ -26,6 +27,12 @@ export const useCustomRoute = (): CustomRoute[] => {
 			id: 3,
 			route: "/signup",
 			element: SignUp,
+		},
+
+		{
+			id: 4,
+			route: "/",
+			element: LandingPage,
 		},
 	];
 };

@@ -12,48 +12,68 @@ import {
 	users,
 } from "@repo/db/game";
 import { eq, or } from "drizzle-orm";
-import { gameManager } from "./GameManager";
+import { socketManager } from "./SocketManager";
+
+type Status = "w" | "b";
 
 export class Game {
 	public player1: User;
-	public player2: User;
+	public player2: User | null;
 	public id: string;
 	private board: Chess;
+	public status: Status | null;
 	private movesId: string[];
 
-	constructor(player1: User, player2: User) {
-		console.log("init the game");
-		this.id = randomUUID();
+	constructor(player1: User, player2?: User, gameId?: string) {
+		this.id = gameId ?? randomUUID();
 		this.player1 = player1;
-		this.player2 = player2;
+		this.player2 = player2 ?? null;
 		this.board = new Chess();
+		this.board.reset();
+		this.status = null;
 		this.movesId = [];
-		this.player1.socket.emit("init_game", {
-			type: Messages.INIT_GAME,
-			payload: {
-				color: Colors.WHITE,
-			},
-		});
-		this.player2.socket.emit("init_game", {
-			type: Messages.INIT_GAME,
-			payload: {
-				color: Colors.BLACK as string,
-			},
-		});
-		this.createGameInDb();
+	}
 
-		this.player1.socket.on("disconnect", () => {
-			this.player2.socket.emit("playerDisconnect");
-		});
+	initSecondPlayer(player2: User) {
+		this.player2 = player2;
+
+		try {
+			this.player1.socket.emit("init_game", {
+				type: Messages.INIT_GAME,
+				payload: {
+					color: Colors.WHITE,
+				},
+			});
+			this.player2.socket.emit("init_game", {
+				type: Messages.INIT_GAME,
+				payload: {
+					color: Colors.BLACK as string,
+				},
+			});
+		} catch (e) {
+			console.log(e);
+			return;
+		}
+		try {
+			this.createGameInDb();
+		} catch (e) {
+			console.log(e);
+			return;
+		}
+
 		this.player2.socket.on("disconnect", () => {
 			this.player1.socket.emit("playerDisconnect");
+		});
+
+		this.player1.socket.on("disconnect", () => {
+			this.player2?.socket.emit("playerDisconnect");
 		});
 	}
 
 	makeMove(move: { from: string; to: string }) {
 		try {
-			console.log(this.board.turn());
 			const latestMove = this.board.move(move);
+			console.log("moves ", latestMove.from, latestMove.to);
 			this.updateMovesAndGame(latestMove);
 		} catch (e) {
 			console.error(e);
@@ -68,17 +88,16 @@ export class Game {
 				},
 			});
 
-			this.player2.socket.emit("game_over", {
+			this.player2?.socket.emit("game_over", {
 				type: Messages.GAME_OVER,
 				payload: {
 					winner,
 				},
 			});
-			gameManager.finishGame(
-				this.player1,
-				this.player2,
-				this.board.turn() === Colors.WHITE ? "b" : "w",
-			);
+			if (!this.player2) return;
+			socketManager.removeUser(this.id, this.player1);
+			socketManager.removeUser(this.id, this.player2);
+			this.status = this.board.turn() === Colors.WHITE ? "b" : "w";
 		}
 		if (this.board.turn() === "w") {
 			console.log("send to 1");
@@ -91,7 +110,7 @@ export class Game {
 			});
 		} else {
 			console.log("send to 2");
-			this.player2.socket.emit("move", {
+			this.player2?.socket.emit("move", {
 				type: Messages.MOVE,
 				payload: {
 					move,
@@ -102,6 +121,7 @@ export class Game {
 	}
 
 	private async createGameInDb() {
+		if (!this.player2) return;
 		const query = await db
 			.insert(game)
 			.values({

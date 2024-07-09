@@ -5,12 +5,7 @@ import { STATUS_CODES } from "@repo/interfaceAndEnums/STATUS_CODES";
 import { db } from "@repo/db/db";
 import { users } from "@repo/db/game";
 import { eq } from "drizzle-orm";
-
-interface IJwtToken {
-	userId: string;
-	iat: number;
-	eat: number;
-}
+import type { IJwtToken } from "@repo/interfaceAndEnums/IJwtToken";
 
 export interface ILoginUser extends Request {
 	userId?: string;

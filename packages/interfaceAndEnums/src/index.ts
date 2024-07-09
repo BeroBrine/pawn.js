@@ -8,10 +8,10 @@ export interface IReceivedEvents {
 	init_game: (data: {
 		type: Messages.INIT_GAME;
 	}) => void;
-	userid: (data: {
+	token: (data: {
 		type: Messages.USER_DATA;
 		payload: {
-			userid: string;
+			token: string;
 		};
 	}) => void;
 	finishGame: () => void;
@@ -28,12 +28,6 @@ export interface IReceivedEvents {
 
 export interface ISentEvents {
 	sendGameToDb: () => void;
-	userid: (data: {
-		type: Messages.USER_DATA;
-		payload: {
-			userid: string;
-		};
-	}) => void;
 	init_game: (data: {
 		type: Messages.INIT_GAME;
 		payload: {
@@ -71,6 +65,12 @@ export interface IExpressSendEvents {
 
 export interface IExpressReceiveEvents {
 	getUserData: () => void;
+}
+
+export interface IJwtToken {
+	userId: string;
+	iat: number;
+	eat: number;
 }
 
 export type ExpressSocket = socket<IExpressReceiveEvents, IExpressSendEvents>;
