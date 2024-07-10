@@ -5,23 +5,30 @@ import { game } from "@repo/db/game";
 import { eq } from "drizzle-orm";
 import { socketManager } from "./SocketManager";
 
-export class GameManager {
+class GameManager {
+	private static instance: GameManager;
 	private games: Game[];
 	private pendingGameid: string | null;
 	private flag: boolean;
 	private users: User[];
 
-	constructor() {
+	private constructor() {
 		this.games = [];
 		this.users = [];
 		this.flag = false;
 		this.pendingGameid = null;
+	}
+	static getInstance() {
+		if (GameManager.instance) return GameManager.instance;
+		GameManager.instance = new GameManager();
+		return GameManager.instance;
 	}
 
 	addUser(user: User) {
 		this.users.push(user);
 		this.addHandler(user);
 	}
+
 	async removeUser(user: User) {
 		const abandonGame = this.games.find(
 			(elem) =>
@@ -40,10 +47,14 @@ export class GameManager {
 	}
 
 	async finishGame(gameId: string, won: "w" | "b") {
-		console.log("finishing the game");
+		console.warn(
+			"DEBUGPRINT[9]: GameManager.ts:51 (after async finishGame(gameId: string, won: w …)",
+		);
 		const finishGame = this.games.find((elem) => gameId === elem.id);
 		if (!finishGame) {
-			console.log("no game found");
+			console.warn(
+				"DEBUGPRINT[10]: GameManager.ts:54 (after if (!finishGame) )",
+			);
 			return;
 		}
 		this.games = this.games.filter((elem) => elem !== finishGame);
@@ -58,18 +69,23 @@ export class GameManager {
 		user.socket.on("init_game", (data) => {
 			if (this.pendingGameid) {
 				const game = this.games.find((game) => game.id === this.pendingGameid);
-				console.log(game?.id, game?.player1.dbId);
+				console.warn("DEBUGPRINT[4]: GameManager.ts:67: game=", game);
 				if (!game) {
 					console.log("couldn't find the game");
 					return;
 				}
 				if (game.player1.dbId === user.dbId) {
-					console.log("game.player1 ", game.player1.dbId);
-					console.log("user dbId ", user.dbId);
+					console.warn(
+						"DEBUGPRINT[6]: GameManager.ts:73: user.dbId)=",
+						user.dbId,
+					);
+					console.warn(
+						"DEBUGPRINT[5]: GameManager.ts:73: game.player1.dbId=",
+						game.player1.dbId,
+					);
 					console.log("trying to play with yourself?");
 					return;
 				}
-				console.log("game id added ", game.id);
 				socketManager.addUser(game.id, user);
 				this.pendingGameid = null;
 				game.initSecondPlayer(user);
@@ -84,17 +100,17 @@ export class GameManager {
 
 		user.socket.on("custom_game", async (data) => {
 			if (!data) return;
-			console.log("data is ", data);
+			console.warn("DEBUGPRINT[7]: GameManager.ts:98: data=", data);
 			if (this.flag) {
-				console.log("p2 is here ");
+				console.warn("p2 is here ");
 				const game = this.games.find((elem) => elem.id === data);
 				game?.initSecondPlayer(user);
 				socketManager.addUser(data, user);
 				this.flag = false;
 			} else {
-				console.log("data is ", data);
-				console.log("p1 is here ");
-				const custGame = new Game(user, data);
+				console.warn("data is ", data);
+				console.warn("p1 is here ");
+				const custGame = new Game(user, data, true);
 				this.games.push(custGame);
 				socketManager.addUser(data, user);
 				this.flag = true;
@@ -108,25 +124,19 @@ export class GameManager {
 					game.player1.dbId === user.dbId || game.player2?.dbId === user.dbId,
 			);
 			if (!game) {
-				console.log("nogame");
+				console.warn("DEBUGPRINT[8]: GameManager.ts:122 (after if (!game) )");
 				return;
 			}
 			if (!message.payload) {
 				throw new Error("No Payload");
 			}
-			if (game) {
-				game.makeMove(message.payload.move);
-				if (game.status) {
-					this.finishGame(game.id, game.status);
-				}
-			}
+			game.makeMove(message.payload.move);
 		});
 
 		user.socket.on("disconnect", () => {
-			console.log("removing the user");
-			console.log(this.users.length);
 			this.removeUser(user);
-			console.log(this.users.length);
 		});
 	}
 }
+
+export const gameManager = GameManager.getInstance();

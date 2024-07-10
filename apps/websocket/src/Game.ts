@@ -1,4 +1,4 @@
-import { Chess, type Square, type Move } from "chess.js";
+import { Chess, type Move } from "chess.js";
 import { Colors } from "@repo/interfaceAndEnums/Colors";
 import { Messages } from "@repo/interfaceAndEnums/Messages";
 import type { User } from "./User";
@@ -13,6 +13,7 @@ import {
 } from "@repo/db/game";
 import { eq, or } from "drizzle-orm";
 import { socketManager } from "./SocketManager";
+import { gameManager } from "./GameManager";
 
 type Status = "w" | "b";
 
@@ -56,16 +57,8 @@ export class Game {
 			console.log(e);
 			return;
 		}
-		if (this.customGame) {
-			try {
-				this.createGameInDb();
-			} catch (e) {
-				console.log(e);
-				return;
-			}
-		} else {
-			this.customGameUpdate();
-		}
+		if (this.customGame) this.customGameUpdate();
+		else this.createGameInDb();
 
 		this.player2.socket.on("disconnect", () => {
 			this.player1.socket.emit("playerDisconnect");
@@ -104,6 +97,10 @@ export class Game {
 			socketManager.removeUser(this.id, this.player1);
 			socketManager.removeUser(this.id, this.player2);
 			this.status = this.board.turn() === Colors.WHITE ? "b" : "w";
+			gameManager.finishGame(
+				this.id,
+				this.board.turn() === Colors.WHITE ? "b" : "w",
+			);
 		}
 		if (this.board.turn() === "w") {
 			console.log("send to 1");
@@ -186,12 +183,25 @@ export class Game {
 			.update(game)
 			.set({
 				moves: this.movesId,
+				currentFen: this.board.fen(),
 			})
 			.where(eq(game.id, this.id));
 	}
 
 	async customGameUpdate() {
 		if (!this.player2) return;
+		const date = new Date();
+		const isoDate = date.toISOString();
+		await db
+			.update(game)
+			.set({
+				player1id: this.player1.dbId,
+				player2id: this.player2.dbId,
+				gameStatus: "GOING_ON",
+				currentFen: this.board.fen(),
+				startAt: isoDate,
+			})
+			.where(eq(game.id, this.id));
 		const userQuery = await db
 			.select()
 			.from(users)

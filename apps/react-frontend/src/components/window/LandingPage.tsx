@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSockets";
 
 function LandingPage() {
 	const navigate = useNavigate();
